@@ -18,75 +18,57 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional
-from pydantic import BaseModel, StrictInt, StrictStr
-from pydantic import Field
+from typing import List, Optional
+from pydantic import BaseModel, Field, StrictInt, StrictStr, conlist
 from openapi_client.models.food_attribute import FoodAttribute
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 class FoodUpdateLog(BaseModel):
     """
     FoodUpdateLog
-    """ # noqa: E501
-    fdc_id: Optional[StrictInt] = Field(default=None, alias="fdcId")
-    available_date: Optional[StrictStr] = Field(default=None, alias="availableDate")
-    brand_owner: Optional[StrictStr] = Field(default=None, alias="brandOwner")
-    data_source: Optional[StrictStr] = Field(default=None, alias="dataSource")
-    data_type: Optional[StrictStr] = Field(default=None, alias="dataType")
+    """
+    fdc_id: Optional[StrictInt] = Field(None, alias="fdcId")
+    available_date: Optional[StrictStr] = Field(None, alias="availableDate")
+    brand_owner: Optional[StrictStr] = Field(None, alias="brandOwner")
+    data_source: Optional[StrictStr] = Field(None, alias="dataSource")
+    data_type: Optional[StrictStr] = Field(None, alias="dataType")
     description: Optional[StrictStr] = None
-    food_class: Optional[StrictStr] = Field(default=None, alias="foodClass")
-    gtin_upc: Optional[StrictStr] = Field(default=None, alias="gtinUpc")
-    household_serving_full_text: Optional[StrictStr] = Field(default=None, alias="householdServingFullText")
+    food_class: Optional[StrictStr] = Field(None, alias="foodClass")
+    gtin_upc: Optional[StrictStr] = Field(None, alias="gtinUpc")
+    household_serving_full_text: Optional[StrictStr] = Field(None, alias="householdServingFullText")
     ingredients: Optional[StrictStr] = None
-    modified_date: Optional[StrictStr] = Field(default=None, alias="modifiedDate")
-    publication_date: Optional[StrictStr] = Field(default=None, alias="publicationDate")
-    serving_size: Optional[StrictInt] = Field(default=None, alias="servingSize")
-    serving_size_unit: Optional[StrictStr] = Field(default=None, alias="servingSizeUnit")
-    branded_food_category: Optional[StrictStr] = Field(default=None, alias="brandedFoodCategory")
+    modified_date: Optional[StrictStr] = Field(None, alias="modifiedDate")
+    publication_date: Optional[StrictStr] = Field(None, alias="publicationDate")
+    serving_size: Optional[StrictInt] = Field(None, alias="servingSize")
+    serving_size_unit: Optional[StrictStr] = Field(None, alias="servingSizeUnit")
+    branded_food_category: Optional[StrictStr] = Field(None, alias="brandedFoodCategory")
     changes: Optional[StrictStr] = None
-    food_attributes: Optional[List[FoodAttribute]] = Field(default=None, alias="foodAttributes")
-    __properties: ClassVar[List[str]] = ["fdcId", "availableDate", "brandOwner", "dataSource", "dataType", "description", "foodClass", "gtinUpc", "householdServingFullText", "ingredients", "modifiedDate", "publicationDate", "servingSize", "servingSizeUnit", "brandedFoodCategory", "changes", "foodAttributes"]
+    food_attributes: Optional[conlist(FoodAttribute)] = Field(None, alias="foodAttributes")
+    __properties = ["fdcId", "availableDate", "brandOwner", "dataSource", "dataType", "description", "foodClass", "gtinUpc", "householdServingFullText", "ingredients", "modifiedDate", "publicationDate", "servingSize", "servingSizeUnit", "brandedFoodCategory", "changes", "foodAttributes"]
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> FoodUpdateLog:
         """Create an instance of FoodUpdateLog from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         # override the default output from pydantic by calling `to_dict()` of each item in food_attributes (list)
         _items = []
         if self.food_attributes:
@@ -97,32 +79,32 @@ class FoodUpdateLog(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> FoodUpdateLog:
         """Create an instance of FoodUpdateLog from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return FoodUpdateLog.parse_obj(obj)
 
-        _obj = cls.model_validate({
-            "fdcId": obj.get("fdcId"),
-            "availableDate": obj.get("availableDate"),
-            "brandOwner": obj.get("brandOwner"),
-            "dataSource": obj.get("dataSource"),
-            "dataType": obj.get("dataType"),
+        _obj = FoodUpdateLog.parse_obj({
+            "fdc_id": obj.get("fdcId"),
+            "available_date": obj.get("availableDate"),
+            "brand_owner": obj.get("brandOwner"),
+            "data_source": obj.get("dataSource"),
+            "data_type": obj.get("dataType"),
             "description": obj.get("description"),
-            "foodClass": obj.get("foodClass"),
-            "gtinUpc": obj.get("gtinUpc"),
-            "householdServingFullText": obj.get("householdServingFullText"),
+            "food_class": obj.get("foodClass"),
+            "gtin_upc": obj.get("gtinUpc"),
+            "household_serving_full_text": obj.get("householdServingFullText"),
             "ingredients": obj.get("ingredients"),
-            "modifiedDate": obj.get("modifiedDate"),
-            "publicationDate": obj.get("publicationDate"),
-            "servingSize": obj.get("servingSize"),
-            "servingSizeUnit": obj.get("servingSizeUnit"),
-            "brandedFoodCategory": obj.get("brandedFoodCategory"),
+            "modified_date": obj.get("modifiedDate"),
+            "publication_date": obj.get("publicationDate"),
+            "serving_size": obj.get("servingSize"),
+            "serving_size_unit": obj.get("servingSizeUnit"),
+            "branded_food_category": obj.get("brandedFoodCategory"),
             "changes": obj.get("changes"),
-            "foodAttributes": [FoodAttribute.from_dict(_item) for _item in obj.get("foodAttributes")] if obj.get("foodAttributes") is not None else None
+            "food_attributes": [FoodAttribute.from_dict(_item) for _item in obj.get("foodAttributes")] if obj.get("foodAttributes") is not None else None
         })
         return _obj
 

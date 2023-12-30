@@ -19,19 +19,14 @@ import pprint
 import re  # noqa: F401
 
 from typing import Optional
-from pydantic import BaseModel, Field, StrictStr, ValidationError, field_validator
+from pydantic import BaseModel, Field, StrictStr, ValidationError, validator
 from openapi_client.models.abridged_food_item import AbridgedFoodItem
 from openapi_client.models.branded_food_item import BrandedFoodItem
 from openapi_client.models.foundation_food_item import FoundationFoodItem
 from openapi_client.models.sr_legacy_food_item import SRLegacyFoodItem
 from openapi_client.models.survey_food_item import SurveyFoodItem
-from typing import Union, Any, List, TYPE_CHECKING, Optional, Dict
-from typing_extensions import Literal
+from typing import Union, Any, List, TYPE_CHECKING
 from pydantic import StrictStr, Field
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 GETFOODS200RESPONSEINNER_ANY_OF_SCHEMAS = ["AbridgedFoodItem", "BrandedFoodItem", "FoundationFoodItem", "SRLegacyFoodItem", "SurveyFoodItem"]
 
@@ -51,15 +46,13 @@ class GetFoods200ResponseInner(BaseModel):
     # data type: SurveyFoodItem
     anyof_schema_5_validator: Optional[SurveyFoodItem] = None
     if TYPE_CHECKING:
-        actual_instance: Optional[Union[AbridgedFoodItem, BrandedFoodItem, FoundationFoodItem, SRLegacyFoodItem, SurveyFoodItem]] = None
+        actual_instance: Union[AbridgedFoodItem, BrandedFoodItem, FoundationFoodItem, SRLegacyFoodItem, SurveyFoodItem]
     else:
-        actual_instance: Any = None
-    any_of_schemas: List[str] = Literal[GETFOODS200RESPONSEINNER_ANY_OF_SCHEMAS]
+        actual_instance: Any
+    any_of_schemas: List[str] = Field(GETFOODS200RESPONSEINNER_ANY_OF_SCHEMAS, const=True)
 
-    model_config = {
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
+    class Config:
+        validate_assignment = True
 
     def __init__(self, *args, **kwargs) -> None:
         if args:
@@ -71,9 +64,9 @@ class GetFoods200ResponseInner(BaseModel):
         else:
             super().__init__(**kwargs)
 
-    @field_validator('actual_instance')
+    @validator('actual_instance')
     def actual_instance_must_validate_anyof(cls, v):
-        instance = GetFoods200ResponseInner.model_construct()
+        instance = GetFoods200ResponseInner.construct()
         error_messages = []
         # validate data type: AbridgedFoodItem
         if not isinstance(v, AbridgedFoodItem):
@@ -112,13 +105,13 @@ class GetFoods200ResponseInner(BaseModel):
             return v
 
     @classmethod
-    def from_dict(cls, obj: dict) -> Self:
+    def from_dict(cls, obj: dict) -> GetFoods200ResponseInner:
         return cls.from_json(json.dumps(obj))
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> GetFoods200ResponseInner:
         """Returns the object represented by the json string"""
-        instance = cls.model_construct()
+        instance = GetFoods200ResponseInner.construct()
         error_messages = []
         # anyof_schema_1_validator: Optional[AbridgedFoodItem] = None
         try:
@@ -168,7 +161,7 @@ class GetFoods200ResponseInner(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:
             return "null"
@@ -181,6 +174,6 @@ class GetFoods200ResponseInner(BaseModel):
 
     def to_str(self) -> str:
         """Returns the string representation of the actual instance"""
-        return pprint.pformat(self.model_dump())
+        return pprint.pformat(self.dict())
 
 

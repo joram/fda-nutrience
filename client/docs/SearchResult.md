@@ -2,7 +2,6 @@
 
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **food_search_criteria** | [**FoodSearchCriteria**](FoodSearchCriteria.md) |  | [optional] 

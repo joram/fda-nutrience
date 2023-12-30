@@ -18,71 +18,53 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from pydantic import BaseModel, StrictFloat, StrictInt, StrictStr
-from pydantic import Field
+from typing import Optional, Union
+from pydantic import BaseModel, Field, StrictFloat, StrictInt, StrictStr
 from openapi_client.models.retention_factor import RetentionFactor
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 class InputFoodSurvey(BaseModel):
     """
-    applies to Survey (FNDDS). Not all inputFoods will have all fields.
-    """ # noqa: E501
+    applies to Survey (FNDDS). Not all inputFoods will have all fields.  # noqa: E501
+    """
     id: Optional[StrictInt] = None
     amount: Optional[Union[StrictFloat, StrictInt]] = None
-    food_description: Optional[StrictStr] = Field(default=None, alias="foodDescription")
-    ingredient_code: Optional[StrictInt] = Field(default=None, alias="ingredientCode")
-    ingredient_description: Optional[StrictStr] = Field(default=None, alias="ingredientDescription")
-    ingredient_weight: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="ingredientWeight")
-    portion_code: Optional[StrictStr] = Field(default=None, alias="portionCode")
-    portion_description: Optional[StrictStr] = Field(default=None, alias="portionDescription")
-    sequence_number: Optional[StrictInt] = Field(default=None, alias="sequenceNumber")
-    survey_flag: Optional[StrictInt] = Field(default=None, alias="surveyFlag")
+    food_description: Optional[StrictStr] = Field(None, alias="foodDescription")
+    ingredient_code: Optional[StrictInt] = Field(None, alias="ingredientCode")
+    ingredient_description: Optional[StrictStr] = Field(None, alias="ingredientDescription")
+    ingredient_weight: Optional[Union[StrictFloat, StrictInt]] = Field(None, alias="ingredientWeight")
+    portion_code: Optional[StrictStr] = Field(None, alias="portionCode")
+    portion_description: Optional[StrictStr] = Field(None, alias="portionDescription")
+    sequence_number: Optional[StrictInt] = Field(None, alias="sequenceNumber")
+    survey_flag: Optional[StrictInt] = Field(None, alias="surveyFlag")
     unit: Optional[StrictStr] = None
-    input_food: Optional[SurveyFoodItem] = Field(default=None, alias="inputFood")
-    retention_factor: Optional[RetentionFactor] = Field(default=None, alias="retentionFactor")
-    __properties: ClassVar[List[str]] = ["id", "amount", "foodDescription", "ingredientCode", "ingredientDescription", "ingredientWeight", "portionCode", "portionDescription", "sequenceNumber", "surveyFlag", "unit", "inputFood", "retentionFactor"]
+    input_food: Optional[SurveyFoodItem] = Field(None, alias="inputFood")
+    retention_factor: Optional[RetentionFactor] = Field(None, alias="retentionFactor")
+    __properties = ["id", "amount", "foodDescription", "ingredientCode", "ingredientDescription", "ingredientWeight", "portionCode", "portionDescription", "sequenceNumber", "surveyFlag", "unit", "inputFood", "retentionFactor"]
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> InputFoodSurvey:
         """Create an instance of InputFoodSurvey from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         # override the default output from pydantic by calling `to_dict()` of input_food
         if self.input_food:
             _dict['inputFood'] = self.input_food.to_dict()
@@ -92,32 +74,31 @@ class InputFoodSurvey(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> InputFoodSurvey:
         """Create an instance of InputFoodSurvey from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return InputFoodSurvey.parse_obj(obj)
 
-        _obj = cls.model_validate({
+        _obj = InputFoodSurvey.parse_obj({
             "id": obj.get("id"),
             "amount": obj.get("amount"),
-            "foodDescription": obj.get("foodDescription"),
-            "ingredientCode": obj.get("ingredientCode"),
-            "ingredientDescription": obj.get("ingredientDescription"),
-            "ingredientWeight": obj.get("ingredientWeight"),
-            "portionCode": obj.get("portionCode"),
-            "portionDescription": obj.get("portionDescription"),
-            "sequenceNumber": obj.get("sequenceNumber"),
-            "surveyFlag": obj.get("surveyFlag"),
+            "food_description": obj.get("foodDescription"),
+            "ingredient_code": obj.get("ingredientCode"),
+            "ingredient_description": obj.get("ingredientDescription"),
+            "ingredient_weight": obj.get("ingredientWeight"),
+            "portion_code": obj.get("portionCode"),
+            "portion_description": obj.get("portionDescription"),
+            "sequence_number": obj.get("sequenceNumber"),
+            "survey_flag": obj.get("surveyFlag"),
             "unit": obj.get("unit"),
-            "inputFood": SurveyFoodItem.from_dict(obj.get("inputFood")) if obj.get("inputFood") is not None else None,
-            "retentionFactor": RetentionFactor.from_dict(obj.get("retentionFactor")) if obj.get("retentionFactor") is not None else None
+            "input_food": SurveyFoodItem.from_dict(obj.get("inputFood")) if obj.get("inputFood") is not None else None,
+            "retention_factor": RetentionFactor.from_dict(obj.get("retentionFactor")) if obj.get("retentionFactor") is not None else None
         })
         return _obj
 
 from openapi_client.models.survey_food_item import SurveyFoodItem
-# TODO: Rewrite to not use raise_errors
-InputFoodSurvey.model_rebuild(raise_errors=False)
+InputFoodSurvey.update_forward_refs()
 

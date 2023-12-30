@@ -18,64 +18,46 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional
-from pydantic import BaseModel, StrictInt
-from pydantic import Field
+from typing import List, Optional
+from pydantic import BaseModel, Field, StrictInt, conlist
 from openapi_client.models.food_search_criteria import FoodSearchCriteria
 from openapi_client.models.search_result_food import SearchResultFood
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 class SearchResult(BaseModel):
     """
     SearchResult
-    """ # noqa: E501
-    food_search_criteria: Optional[FoodSearchCriteria] = Field(default=None, alias="foodSearchCriteria")
-    total_hits: Optional[StrictInt] = Field(default=None, description="The total number of foods found matching the search criteria.", alias="totalHits")
-    current_page: Optional[StrictInt] = Field(default=None, description="The current page of results being returned.", alias="currentPage")
-    total_pages: Optional[StrictInt] = Field(default=None, description="The total number of pages found matching the search criteria.", alias="totalPages")
-    foods: Optional[List[SearchResultFood]] = Field(default=None, description="The list of foods found matching the search criteria. See Food Fields below.")
-    __properties: ClassVar[List[str]] = ["foodSearchCriteria", "totalHits", "currentPage", "totalPages", "foods"]
+    """
+    food_search_criteria: Optional[FoodSearchCriteria] = Field(None, alias="foodSearchCriteria")
+    total_hits: Optional[StrictInt] = Field(None, alias="totalHits", description="The total number of foods found matching the search criteria.")
+    current_page: Optional[StrictInt] = Field(None, alias="currentPage", description="The current page of results being returned.")
+    total_pages: Optional[StrictInt] = Field(None, alias="totalPages", description="The total number of pages found matching the search criteria.")
+    foods: Optional[conlist(SearchResultFood)] = Field(None, description="The list of foods found matching the search criteria. See Food Fields below.")
+    __properties = ["foodSearchCriteria", "totalHits", "currentPage", "totalPages", "foods"]
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> SearchResult:
         """Create an instance of SearchResult from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         # override the default output from pydantic by calling `to_dict()` of food_search_criteria
         if self.food_search_criteria:
             _dict['foodSearchCriteria'] = self.food_search_criteria.to_dict()
@@ -89,19 +71,19 @@ class SearchResult(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> SearchResult:
         """Create an instance of SearchResult from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return SearchResult.parse_obj(obj)
 
-        _obj = cls.model_validate({
-            "foodSearchCriteria": FoodSearchCriteria.from_dict(obj.get("foodSearchCriteria")) if obj.get("foodSearchCriteria") is not None else None,
-            "totalHits": obj.get("totalHits"),
-            "currentPage": obj.get("currentPage"),
-            "totalPages": obj.get("totalPages"),
+        _obj = SearchResult.parse_obj({
+            "food_search_criteria": FoodSearchCriteria.from_dict(obj.get("foodSearchCriteria")) if obj.get("foodSearchCriteria") is not None else None,
+            "total_hits": obj.get("totalHits"),
+            "current_page": obj.get("currentPage"),
+            "total_pages": obj.get("totalPages"),
             "foods": [SearchResultFood.from_dict(_item) for _item in obj.get("foods")] if obj.get("foods") is not None else None
         })
         return _obj

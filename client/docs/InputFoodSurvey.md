@@ -3,7 +3,6 @@
 applies to Survey (FNDDS). Not all inputFoods will have all fields.
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | [optional] 

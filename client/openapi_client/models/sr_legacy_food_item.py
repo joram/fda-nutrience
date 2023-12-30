@@ -18,71 +18,53 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional
-from pydantic import BaseModel, StrictBool, StrictInt, StrictStr
-from pydantic import Field
+from typing import List, Optional
+from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr, conlist
 from openapi_client.models.food_category import FoodCategory
 from openapi_client.models.food_nutrient import FoodNutrient
 from openapi_client.models.nutrient_conversion_factors import NutrientConversionFactors
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 class SRLegacyFoodItem(BaseModel):
     """
     SRLegacyFoodItem
-    """ # noqa: E501
-    fdc_id: StrictInt = Field(alias="fdcId")
-    data_type: StrictStr = Field(alias="dataType")
-    description: StrictStr
-    food_class: Optional[StrictStr] = Field(default=None, alias="foodClass")
-    is_historical_reference: Optional[StrictBool] = Field(default=None, alias="isHistoricalReference")
-    ndb_number: Optional[StrictInt] = Field(default=None, alias="ndbNumber")
-    publication_date: Optional[StrictStr] = Field(default=None, alias="publicationDate")
-    scientific_name: Optional[StrictStr] = Field(default=None, alias="scientificName")
-    food_category: Optional[FoodCategory] = Field(default=None, alias="foodCategory")
-    food_nutrients: Optional[List[FoodNutrient]] = Field(default=None, alias="foodNutrients")
-    nutrient_conversion_factors: Optional[List[NutrientConversionFactors]] = Field(default=None, alias="nutrientConversionFactors")
-    __properties: ClassVar[List[str]] = ["fdcId", "dataType", "description", "foodClass", "isHistoricalReference", "ndbNumber", "publicationDate", "scientificName", "foodCategory", "foodNutrients", "nutrientConversionFactors"]
+    """
+    fdc_id: StrictInt = Field(..., alias="fdcId")
+    data_type: StrictStr = Field(..., alias="dataType")
+    description: StrictStr = Field(...)
+    food_class: Optional[StrictStr] = Field(None, alias="foodClass")
+    is_historical_reference: Optional[StrictBool] = Field(None, alias="isHistoricalReference")
+    ndb_number: Optional[StrictInt] = Field(None, alias="ndbNumber")
+    publication_date: Optional[StrictStr] = Field(None, alias="publicationDate")
+    scientific_name: Optional[StrictStr] = Field(None, alias="scientificName")
+    food_category: Optional[FoodCategory] = Field(None, alias="foodCategory")
+    food_nutrients: Optional[conlist(FoodNutrient)] = Field(None, alias="foodNutrients")
+    nutrient_conversion_factors: Optional[conlist(NutrientConversionFactors)] = Field(None, alias="nutrientConversionFactors")
+    __properties = ["fdcId", "dataType", "description", "foodClass", "isHistoricalReference", "ndbNumber", "publicationDate", "scientificName", "foodCategory", "foodNutrients", "nutrientConversionFactors"]
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> SRLegacyFoodItem:
         """Create an instance of SRLegacyFoodItem from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         # override the default output from pydantic by calling `to_dict()` of food_category
         if self.food_category:
             _dict['foodCategory'] = self.food_category.to_dict()
@@ -103,26 +85,26 @@ class SRLegacyFoodItem(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> SRLegacyFoodItem:
         """Create an instance of SRLegacyFoodItem from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return SRLegacyFoodItem.parse_obj(obj)
 
-        _obj = cls.model_validate({
-            "fdcId": obj.get("fdcId"),
-            "dataType": obj.get("dataType"),
+        _obj = SRLegacyFoodItem.parse_obj({
+            "fdc_id": obj.get("fdcId"),
+            "data_type": obj.get("dataType"),
             "description": obj.get("description"),
-            "foodClass": obj.get("foodClass"),
-            "isHistoricalReference": obj.get("isHistoricalReference"),
-            "ndbNumber": obj.get("ndbNumber"),
-            "publicationDate": obj.get("publicationDate"),
-            "scientificName": obj.get("scientificName"),
-            "foodCategory": FoodCategory.from_dict(obj.get("foodCategory")) if obj.get("foodCategory") is not None else None,
-            "foodNutrients": [FoodNutrient.from_dict(_item) for _item in obj.get("foodNutrients")] if obj.get("foodNutrients") is not None else None,
-            "nutrientConversionFactors": [NutrientConversionFactors.from_dict(_item) for _item in obj.get("nutrientConversionFactors")] if obj.get("nutrientConversionFactors") is not None else None
+            "food_class": obj.get("foodClass"),
+            "is_historical_reference": obj.get("isHistoricalReference"),
+            "ndb_number": obj.get("ndbNumber"),
+            "publication_date": obj.get("publicationDate"),
+            "scientific_name": obj.get("scientificName"),
+            "food_category": FoodCategory.from_dict(obj.get("foodCategory")) if obj.get("foodCategory") is not None else None,
+            "food_nutrients": [FoodNutrient.from_dict(_item) for _item in obj.get("foodNutrients")] if obj.get("foodNutrients") is not None else None,
+            "nutrient_conversion_factors": [NutrientConversionFactors.from_dict(_item) for _item in obj.get("nutrientConversionFactors")] if obj.get("nutrientConversionFactors") is not None else None
         })
         return _obj
 

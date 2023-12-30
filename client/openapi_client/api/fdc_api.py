@@ -12,20 +12,14 @@
 """  # noqa: E501
 
 
+import re  # noqa: F401
 import io
 import warnings
 
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
-from typing import Dict, List, Optional, Tuple, Union, Any
+from pydantic import validate_arguments, ValidationError
 
-try:
-    from typing import Annotated
-except ImportError:
-    from typing_extensions import Annotated
-
-from pydantic import Field
 from typing_extensions import Annotated
-from pydantic import StrictInt, StrictStr, field_validator
+from pydantic import Field, StrictInt, StrictStr, conint, conlist, validator
 
 from typing import List, Optional
 
@@ -39,7 +33,10 @@ from openapi_client.models.search_result import SearchResult
 
 from openapi_client.api_client import ApiClient
 from openapi_client.api_response import ApiResponse
-from openapi_client.rest import RESTResponseType
+from openapi_client.exceptions import (  # noqa: F401
+    ApiTypeError,
+    ApiValueError
+)
 
 
 class FDCApi:
@@ -54,29 +51,16 @@ class FDCApi:
             api_client = ApiClient.get_default()
         self.api_client = api_client
 
+    @validate_arguments
+    def get_food(self, fdc_id : Annotated[StrictStr, Field(..., description="FDC id of the food to retrieve")], format : Annotated[Optional[StrictStr], Field(description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")] = None, nutrients : Annotated[Optional[conlist(StrictInt, max_items=25, min_items=1)], Field(description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")] = None, **kwargs) -> InlineResponse200:  # noqa: E501
+        """Fetches details for one food item by FDC ID  # noqa: E501
 
-    @validate_call
-    def get_food(
-        self,
-        fdc_id: Annotated[StrictStr, Field(description="FDC id of the food to retrieve")],
-        format: Annotated[Optional[StrictStr], Field(description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")] = None,
-        nutrients: Annotated[Optional[Annotated[List[StrictInt], Field(min_length=1, max_length=25)]], Field(description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> InlineResponse200:
-        """Fetches details for one food item by FDC ID
+        Retrieves a single food item by an FDC ID. Optional format and nutrients can be specified.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-        Retrieves a single food item by an FDC ID. Optional format and nutrients can be specified.
+        >>> thread = api.get_food(fdc_id, format, nutrients, async_req=True)
+        >>> result = thread.get()
 
         :param fdc_id: FDC id of the food to retrieve (required)
         :type fdc_id: str
@@ -84,76 +68,33 @@ class FDCApi:
         :type format: str
         :param nutrients: Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.
         :type nutrients: List[int]
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _request_timeout: timeout setting for this request.
+               If one number provided, it will be total request
+               timeout. It can also be a pair (tuple) of
+               (connection, read) timeouts.
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: InlineResponse200
+        """
+        kwargs['_return_http_data_only'] = True
+        if '_preload_content' in kwargs:
+            message = "Error! Please call the get_food_with_http_info method with `_preload_content` instead and obtain raw data from ApiResponse.raw_data"  # noqa: E501
+            raise ValueError(message)
+        return self.get_food_with_http_info(fdc_id, format, nutrients, **kwargs)  # noqa: E501
 
-        _param = self._get_food_serialize(
-            fdc_id=fdc_id,
-            format=format,
-            nutrients=nutrients,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+    @validate_arguments
+    def get_food_with_http_info(self, fdc_id : Annotated[StrictStr, Field(..., description="FDC id of the food to retrieve")], format : Annotated[Optional[StrictStr], Field(description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")] = None, nutrients : Annotated[Optional[conlist(StrictInt, max_items=25, min_items=1)], Field(description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")] = None, **kwargs) -> ApiResponse:  # noqa: E501
+        """Fetches details for one food item by FDC ID  # noqa: E501
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "InlineResponse200",
-            '400': None,
-            '404': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
+        Retrieves a single food item by an FDC ID. Optional format and nutrients can be specified.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def get_food_with_http_info(
-        self,
-        fdc_id: Annotated[StrictStr, Field(description="FDC id of the food to retrieve")],
-        format: Annotated[Optional[StrictStr], Field(description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")] = None,
-        nutrients: Annotated[Optional[Annotated[List[StrictInt], Field(min_length=1, max_length=25)]], Field(description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[InlineResponse200]:
-        """Fetches details for one food item by FDC ID
-
-        Retrieves a single food item by an FDC ID. Optional format and nutrients can be specified.
+        >>> thread = api.get_food_with_http_info(fdc_id, format, nutrients, async_req=True)
+        >>> result = thread.get()
 
         :param fdc_id: FDC id of the food to retrieve (required)
         :type fdc_id: str
@@ -161,221 +102,124 @@ class FDCApi:
         :type format: str
         :param nutrients: Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.
         :type nutrients: List[int]
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _preload_content: if False, the ApiResponse.data will
+                                 be set to none and raw_data will store the
+                                 HTTP response body without reading/decoding.
+                                 Default is True.
+        :type _preload_content: bool, optional
+        :param _return_http_data_only: response data instead of ApiResponse
+                                       object with status code, headers, etc
+        :type _return_http_data_only: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
         :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
+                              request; this effectively ignores the authentication
+                              in the spec for a single request.
         :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :type _content_type: string, optional: force content-type for the request
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: tuple(InlineResponse200, status_code(int), headers(HTTPHeaderDict))
+        """
 
-        _param = self._get_food_serialize(
-            fdc_id=fdc_id,
-            format=format,
-            nutrients=nutrients,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+        _params = locals()
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "InlineResponse200",
-            '400': None,
-            '404': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    def get_food_without_preload_content(
-        self,
-        fdc_id: Annotated[StrictStr, Field(description="FDC id of the food to retrieve")],
-        format: Annotated[Optional[StrictStr], Field(description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")] = None,
-        nutrients: Annotated[Optional[Annotated[List[StrictInt], Field(min_length=1, max_length=25)]], Field(description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
+        _all_params = [
+            'fdc_id',
+            'format',
+            'nutrients'
+        ]
+        _all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout',
+                '_request_auth',
+                '_content_type',
+                '_headers'
             ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Fetches details for one food item by FDC ID
-
-        Retrieves a single food item by an FDC ID. Optional format and nutrients can be specified.
-
-        :param fdc_id: FDC id of the food to retrieve (required)
-        :type fdc_id: str
-        :param format: Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).
-        :type format: str
-        :param nutrients: Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.
-        :type nutrients: List[int]
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_food_serialize(
-            fdc_id=fdc_id,
-            format=format,
-            nutrients=nutrients,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "InlineResponse200",
-            '400': None,
-            '404': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
+        # validate the arguments
+        for _key, _val in _params['kwargs'].items():
+            if _key not in _all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_food" % _key
+                )
+            _params[_key] = _val
+        del _params['kwargs']
 
-
-    def _get_food_serialize(
-        self,
-        fdc_id,
-        format,
-        nutrients,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> Tuple:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-            'nutrients': 'multi',
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, str] = {}
-        _body_params: Optional[bytes] = None
+        _collection_formats = {}
 
         # process the path parameters
-        if fdc_id is not None:
-            _path_params['fdcId'] = fdc_id
+        _path_params = {}
+        if _params['fdc_id'] is not None:
+            _path_params['fdcId'] = _params['fdc_id']
+
+
         # process the query parameters
-        if format is not None:
-            
-            _query_params.append(('format', format))
-            
-        if nutrients is not None:
-            
-            _query_params.append(('nutrients', nutrients))
-            
+        _query_params = []
+        if _params.get('format') is not None:  # noqa: E501
+            _query_params.append(('format', _params['format']))
+
+        if _params.get('nutrients') is not None:  # noqa: E501
+            _query_params.append(('nutrients', _params['nutrients']))
+            _collection_formats['nutrients'] = 'multi'
+
         # process the header parameters
+        _header_params = dict(_params.get('_headers', {}))
         # process the form parameters
+        _form_params = []
+        _files = {}
         # process the body parameter
-
-
+        _body_params = None
         # set the HTTP header `Accept`
         _header_params['Accept'] = self.api_client.select_header_accept(
-            [
-                'application/json'
-            ]
-        )
-
+            ['application/json'])  # noqa: E501
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'ApiKeyAuth'
-        ]
+        _auth_settings = ['ApiKeyAuth']  # noqa: E501
 
-        return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/v1/food/{fdcId}',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
+        _response_types_map = {
+            '200': "InlineResponse200",
+            '400': None,
+            '404': None,
+        }
+
+        return self.api_client.call_api(
+            '/v1/food/{fdcId}', 'GET',
+            _path_params,
+            _query_params,
+            _header_params,
             body=_body_params,
             post_params=_form_params,
             files=_files,
+            response_types_map=_response_types_map,
             auth_settings=_auth_settings,
+            async_req=_params.get('async_req'),
+            _return_http_data_only=_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=_params.get('_preload_content', True),
+            _request_timeout=_params.get('_request_timeout'),
             collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
+            _request_auth=_params.get('_request_auth'))
 
+    @validate_arguments
+    def get_foods(self, fdc_ids : Annotated[conlist(StrictStr, max_items=20, min_items=1), Field(..., description="List of multiple FDC ID's. Should be comma separated list (e.g. fdcIds=534358,373052) or repeating parameters (e.g. fdcIds=534358&fdcIds=373052).")], format : Annotated[Optional[StrictStr], Field(description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")] = None, nutrients : Annotated[Optional[conlist(StrictInt, max_items=25, min_items=1)], Field(description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")] = None, **kwargs) -> List[GetFoods200ResponseInner]:  # noqa: E501
+        """Fetches details for multiple food items using input FDC IDs  # noqa: E501
 
+        Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def get_foods(
-        self,
-        fdc_ids: Annotated[List[StrictStr], Field(min_length=1, max_length=20, description="List of multiple FDC ID's. Should be comma separated list (e.g. fdcIds=534358,373052) or repeating parameters (e.g. fdcIds=534358&fdcIds=373052).")],
-        format: Annotated[Optional[StrictStr], Field(description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")] = None,
-        nutrients: Annotated[Optional[Annotated[List[StrictInt], Field(min_length=1, max_length=25)]], Field(description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[GetFoods200ResponseInner]:
-        """Fetches details for multiple food items using input FDC IDs
-
-        Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.
+        >>> thread = api.get_foods(fdc_ids, format, nutrients, async_req=True)
+        >>> result = thread.get()
 
         :param fdc_ids: List of multiple FDC ID's. Should be comma separated list (e.g. fdcIds=534358,373052) or repeating parameters (e.g. fdcIds=534358&fdcIds=373052). (required)
         :type fdc_ids: List[str]
@@ -383,75 +227,33 @@ class FDCApi:
         :type format: str
         :param nutrients: Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.
         :type nutrients: List[int]
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _request_timeout: timeout setting for this request.
+               If one number provided, it will be total request
+               timeout. It can also be a pair (tuple) of
+               (connection, read) timeouts.
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: List[GetFoods200ResponseInner]
+        """
+        kwargs['_return_http_data_only'] = True
+        if '_preload_content' in kwargs:
+            message = "Error! Please call the get_foods_with_http_info method with `_preload_content` instead and obtain raw data from ApiResponse.raw_data"  # noqa: E501
+            raise ValueError(message)
+        return self.get_foods_with_http_info(fdc_ids, format, nutrients, **kwargs)  # noqa: E501
 
-        _param = self._get_foods_serialize(
-            fdc_ids=fdc_ids,
-            format=format,
-            nutrients=nutrients,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+    @validate_arguments
+    def get_foods_with_http_info(self, fdc_ids : Annotated[conlist(StrictStr, max_items=20, min_items=1), Field(..., description="List of multiple FDC ID's. Should be comma separated list (e.g. fdcIds=534358,373052) or repeating parameters (e.g. fdcIds=534358&fdcIds=373052).")], format : Annotated[Optional[StrictStr], Field(description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")] = None, nutrients : Annotated[Optional[conlist(StrictInt, max_items=25, min_items=1)], Field(description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")] = None, **kwargs) -> ApiResponse:  # noqa: E501
+        """Fetches details for multiple food items using input FDC IDs  # noqa: E501
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[GetFoods200ResponseInner]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
+        Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def get_foods_with_http_info(
-        self,
-        fdc_ids: Annotated[List[StrictStr], Field(min_length=1, max_length=20, description="List of multiple FDC ID's. Should be comma separated list (e.g. fdcIds=534358,373052) or repeating parameters (e.g. fdcIds=534358&fdcIds=373052).")],
-        format: Annotated[Optional[StrictStr], Field(description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")] = None,
-        nutrients: Annotated[Optional[Annotated[List[StrictInt], Field(min_length=1, max_length=25)]], Field(description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[GetFoods200ResponseInner]]:
-        """Fetches details for multiple food items using input FDC IDs
-
-        Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.
+        >>> thread = api.get_foods_with_http_info(fdc_ids, format, nutrients, async_req=True)
+        >>> result = thread.get()
 
         :param fdc_ids: List of multiple FDC ID's. Should be comma separated list (e.g. fdcIds=534358,373052) or repeating parameters (e.g. fdcIds=534358&fdcIds=373052). (required)
         :type fdc_ids: List[str]
@@ -459,224 +261,124 @@ class FDCApi:
         :type format: str
         :param nutrients: Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.
         :type nutrients: List[int]
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _preload_content: if False, the ApiResponse.data will
+                                 be set to none and raw_data will store the
+                                 HTTP response body without reading/decoding.
+                                 Default is True.
+        :type _preload_content: bool, optional
+        :param _return_http_data_only: response data instead of ApiResponse
+                                       object with status code, headers, etc
+        :type _return_http_data_only: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
         :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
+                              request; this effectively ignores the authentication
+                              in the spec for a single request.
         :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :type _content_type: string, optional: force content-type for the request
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: tuple(List[GetFoods200ResponseInner], status_code(int), headers(HTTPHeaderDict))
+        """
 
-        _param = self._get_foods_serialize(
-            fdc_ids=fdc_ids,
-            format=format,
-            nutrients=nutrients,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+        _params = locals()
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[GetFoods200ResponseInner]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    def get_foods_without_preload_content(
-        self,
-        fdc_ids: Annotated[List[StrictStr], Field(min_length=1, max_length=20, description="List of multiple FDC ID's. Should be comma separated list (e.g. fdcIds=534358,373052) or repeating parameters (e.g. fdcIds=534358&fdcIds=373052).")],
-        format: Annotated[Optional[StrictStr], Field(description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")] = None,
-        nutrients: Annotated[Optional[Annotated[List[StrictInt], Field(min_length=1, max_length=25)]], Field(description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
+        _all_params = [
+            'fdc_ids',
+            'format',
+            'nutrients'
+        ]
+        _all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout',
+                '_request_auth',
+                '_content_type',
+                '_headers'
             ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Fetches details for multiple food items using input FDC IDs
-
-        Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.
-
-        :param fdc_ids: List of multiple FDC ID's. Should be comma separated list (e.g. fdcIds=534358,373052) or repeating parameters (e.g. fdcIds=534358&fdcIds=373052). (required)
-        :type fdc_ids: List[str]
-        :param format: Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).
-        :type format: str
-        :param nutrients: Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned. Should be comma separated list (e.g. nutrients=203,204) or repeating parameters (e.g. nutrients=203&nutrients=204). If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.
-        :type nutrients: List[int]
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_foods_serialize(
-            fdc_ids=fdc_ids,
-            format=format,
-            nutrients=nutrients,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[GetFoods200ResponseInner]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
+        # validate the arguments
+        for _key, _val in _params['kwargs'].items():
+            if _key not in _all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_foods" % _key
+                )
+            _params[_key] = _val
+        del _params['kwargs']
 
-
-    def _get_foods_serialize(
-        self,
-        fdc_ids,
-        format,
-        nutrients,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> Tuple:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-            'fdcIds': 'multi',
-            'nutrients': 'multi',
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, str] = {}
-        _body_params: Optional[bytes] = None
+        _collection_formats = {}
 
         # process the path parameters
+        _path_params = {}
+
         # process the query parameters
-        if fdc_ids is not None:
-            
-            _query_params.append(('fdcIds', fdc_ids))
-            
-        if format is not None:
-            
-            _query_params.append(('format', format))
-            
-        if nutrients is not None:
-            
-            _query_params.append(('nutrients', nutrients))
-            
+        _query_params = []
+        if _params.get('fdc_ids') is not None:  # noqa: E501
+            _query_params.append(('fdcIds', _params['fdc_ids']))
+            _collection_formats['fdcIds'] = 'multi'
+
+        if _params.get('format') is not None:  # noqa: E501
+            _query_params.append(('format', _params['format']))
+
+        if _params.get('nutrients') is not None:  # noqa: E501
+            _query_params.append(('nutrients', _params['nutrients']))
+            _collection_formats['nutrients'] = 'multi'
+
         # process the header parameters
+        _header_params = dict(_params.get('_headers', {}))
         # process the form parameters
+        _form_params = []
+        _files = {}
         # process the body parameter
-
-
+        _body_params = None
         # set the HTTP header `Accept`
         _header_params['Accept'] = self.api_client.select_header_accept(
-            [
-                'application/json'
-            ]
-        )
-
+            ['application/json'])  # noqa: E501
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'ApiKeyAuth'
-        ]
+        _auth_settings = ['ApiKeyAuth']  # noqa: E501
 
-        return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/v1/foods',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
+        _response_types_map = {
+            '200': "List[GetFoods200ResponseInner]",
+            '400': None,
+        }
+
+        return self.api_client.call_api(
+            '/v1/foods', 'GET',
+            _path_params,
+            _query_params,
+            _header_params,
             body=_body_params,
             post_params=_form_params,
             files=_files,
+            response_types_map=_response_types_map,
             auth_settings=_auth_settings,
+            async_req=_params.get('async_req'),
+            _return_http_data_only=_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=_params.get('_preload_content', True),
+            _request_timeout=_params.get('_request_timeout'),
             collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
+            _request_auth=_params.get('_request_auth'))
 
+    @validate_arguments
+    def get_foods_list(self, data_type : Annotated[Optional[conlist(StrictStr, max_items=4, min_items=1)], Field(description="Optional. Filter on a specific data type; specify one or more values in an array.")] = None, page_size : Annotated[Optional[conint(strict=True, le=200, ge=1)], Field(description="Optional. Maximum number of results to return for the current page. Default is 50.")] = None, page_number : Annotated[Optional[StrictInt], Field(description="Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)")] = None, sort_by : Annotated[Optional[StrictStr], Field(description="Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.")] = None, sort_order : Annotated[Optional[StrictStr], Field(description="Optional. The sort direction for the results. Only applicable if sortBy is specified.")] = None, **kwargs) -> List[AbridgedFoodItem]:  # noqa: E501
+        """Returns a paged list of foods, in the 'abridged' format  # noqa: E501
 
+        Retrieves a paged list of foods. Use the pageNumber parameter to page through the entire result set.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def get_foods_list(
-        self,
-        data_type: Annotated[Optional[Annotated[List[StrictStr], Field(min_length=1, max_length=4)]], Field(description="Optional. Filter on a specific data type; specify one or more values in an array.")] = None,
-        page_size: Annotated[Optional[Annotated[int, Field(le=200, strict=True, ge=1)]], Field(description="Optional. Maximum number of results to return for the current page. Default is 50.")] = None,
-        page_number: Annotated[Optional[StrictInt], Field(description="Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.")] = None,
-        sort_order: Annotated[Optional[StrictStr], Field(description="Optional. The sort direction for the results. Only applicable if sortBy is specified.")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[AbridgedFoodItem]:
-        """Returns a paged list of foods, in the 'abridged' format
-
-        Retrieves a paged list of foods. Use the pageNumber parameter to page through the entire result set.
+        >>> thread = api.get_foods_list(data_type, page_size, page_number, sort_by, sort_order, async_req=True)
+        >>> result = thread.get()
 
         :param data_type: Optional. Filter on a specific data type; specify one or more values in an array.
         :type data_type: List[str]
@@ -688,79 +390,33 @@ class FDCApi:
         :type sort_by: str
         :param sort_order: Optional. The sort direction for the results. Only applicable if sortBy is specified.
         :type sort_order: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _request_timeout: timeout setting for this request.
+               If one number provided, it will be total request
+               timeout. It can also be a pair (tuple) of
+               (connection, read) timeouts.
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: List[AbridgedFoodItem]
+        """
+        kwargs['_return_http_data_only'] = True
+        if '_preload_content' in kwargs:
+            message = "Error! Please call the get_foods_list_with_http_info method with `_preload_content` instead and obtain raw data from ApiResponse.raw_data"  # noqa: E501
+            raise ValueError(message)
+        return self.get_foods_list_with_http_info(data_type, page_size, page_number, sort_by, sort_order, **kwargs)  # noqa: E501
 
-        _param = self._get_foods_list_serialize(
-            data_type=data_type,
-            page_size=page_size,
-            page_number=page_number,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+    @validate_arguments
+    def get_foods_list_with_http_info(self, data_type : Annotated[Optional[conlist(StrictStr, max_items=4, min_items=1)], Field(description="Optional. Filter on a specific data type; specify one or more values in an array.")] = None, page_size : Annotated[Optional[conint(strict=True, le=200, ge=1)], Field(description="Optional. Maximum number of results to return for the current page. Default is 50.")] = None, page_number : Annotated[Optional[StrictInt], Field(description="Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)")] = None, sort_by : Annotated[Optional[StrictStr], Field(description="Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.")] = None, sort_order : Annotated[Optional[StrictStr], Field(description="Optional. The sort direction for the results. Only applicable if sortBy is specified.")] = None, **kwargs) -> ApiResponse:  # noqa: E501
+        """Returns a paged list of foods, in the 'abridged' format  # noqa: E501
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[AbridgedFoodItem]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
+        Retrieves a paged list of foods. Use the pageNumber parameter to page through the entire result set.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def get_foods_list_with_http_info(
-        self,
-        data_type: Annotated[Optional[Annotated[List[StrictStr], Field(min_length=1, max_length=4)]], Field(description="Optional. Filter on a specific data type; specify one or more values in an array.")] = None,
-        page_size: Annotated[Optional[Annotated[int, Field(le=200, strict=True, ge=1)]], Field(description="Optional. Maximum number of results to return for the current page. Default is 50.")] = None,
-        page_number: Annotated[Optional[StrictInt], Field(description="Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.")] = None,
-        sort_order: Annotated[Optional[StrictStr], Field(description="Optional. The sort direction for the results. Only applicable if sortBy is specified.")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[AbridgedFoodItem]]:
-        """Returns a paged list of foods, in the 'abridged' format
-
-        Retrieves a paged list of foods. Use the pageNumber parameter to page through the entire result set.
+        >>> thread = api.get_foods_list_with_http_info(data_type, page_size, page_number, sort_by, sort_order, async_req=True)
+        >>> result = thread.get()
 
         :param data_type: Optional. Filter on a specific data type; specify one or more values in an array.
         :type data_type: List[str]
@@ -772,245 +428,131 @@ class FDCApi:
         :type sort_by: str
         :param sort_order: Optional. The sort direction for the results. Only applicable if sortBy is specified.
         :type sort_order: str
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _preload_content: if False, the ApiResponse.data will
+                                 be set to none and raw_data will store the
+                                 HTTP response body without reading/decoding.
+                                 Default is True.
+        :type _preload_content: bool, optional
+        :param _return_http_data_only: response data instead of ApiResponse
+                                       object with status code, headers, etc
+        :type _return_http_data_only: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
         :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
+                              request; this effectively ignores the authentication
+                              in the spec for a single request.
         :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :type _content_type: string, optional: force content-type for the request
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: tuple(List[AbridgedFoodItem], status_code(int), headers(HTTPHeaderDict))
+        """
 
-        _param = self._get_foods_list_serialize(
-            data_type=data_type,
-            page_size=page_size,
-            page_number=page_number,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+        _params = locals()
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[AbridgedFoodItem]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    def get_foods_list_without_preload_content(
-        self,
-        data_type: Annotated[Optional[Annotated[List[StrictStr], Field(min_length=1, max_length=4)]], Field(description="Optional. Filter on a specific data type; specify one or more values in an array.")] = None,
-        page_size: Annotated[Optional[Annotated[int, Field(le=200, strict=True, ge=1)]], Field(description="Optional. Maximum number of results to return for the current page. Default is 50.")] = None,
-        page_number: Annotated[Optional[StrictInt], Field(description="Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.")] = None,
-        sort_order: Annotated[Optional[StrictStr], Field(description="Optional. The sort direction for the results. Only applicable if sortBy is specified.")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
+        _all_params = [
+            'data_type',
+            'page_size',
+            'page_number',
+            'sort_by',
+            'sort_order'
+        ]
+        _all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout',
+                '_request_auth',
+                '_content_type',
+                '_headers'
             ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Returns a paged list of foods, in the 'abridged' format
-
-        Retrieves a paged list of foods. Use the pageNumber parameter to page through the entire result set.
-
-        :param data_type: Optional. Filter on a specific data type; specify one or more values in an array.
-        :type data_type: List[str]
-        :param page_size: Optional. Maximum number of results to return for the current page. Default is 50.
-        :type page_size: int
-        :param page_number: Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)
-        :type page_number: int
-        :param sort_by: Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.
-        :type sort_by: str
-        :param sort_order: Optional. The sort direction for the results. Only applicable if sortBy is specified.
-        :type sort_order: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_foods_list_serialize(
-            data_type=data_type,
-            page_size=page_size,
-            page_number=page_number,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[AbridgedFoodItem]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
+        # validate the arguments
+        for _key, _val in _params['kwargs'].items():
+            if _key not in _all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_foods_list" % _key
+                )
+            _params[_key] = _val
+        del _params['kwargs']
 
-
-    def _get_foods_list_serialize(
-        self,
-        data_type,
-        page_size,
-        page_number,
-        sort_by,
-        sort_order,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> Tuple:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-            'dataType': 'csv',
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, str] = {}
-        _body_params: Optional[bytes] = None
+        _collection_formats = {}
 
         # process the path parameters
+        _path_params = {}
+
         # process the query parameters
-        if data_type is not None:
-            
-            _query_params.append(('dataType', data_type))
-            
-        if page_size is not None:
-            
-            _query_params.append(('pageSize', page_size))
-            
-        if page_number is not None:
-            
-            _query_params.append(('pageNumber', page_number))
-            
-        if sort_by is not None:
-            
-            _query_params.append(('sortBy', sort_by))
-            
-        if sort_order is not None:
-            
-            _query_params.append(('sortOrder', sort_order))
-            
+        _query_params = []
+        if _params.get('data_type') is not None:  # noqa: E501
+            _query_params.append(('dataType', _params['data_type']))
+            _collection_formats['dataType'] = 'csv'
+
+        if _params.get('page_size') is not None:  # noqa: E501
+            _query_params.append(('pageSize', _params['page_size']))
+
+        if _params.get('page_number') is not None:  # noqa: E501
+            _query_params.append(('pageNumber', _params['page_number']))
+
+        if _params.get('sort_by') is not None:  # noqa: E501
+            _query_params.append(('sortBy', _params['sort_by']))
+
+        if _params.get('sort_order') is not None:  # noqa: E501
+            _query_params.append(('sortOrder', _params['sort_order']))
+
         # process the header parameters
+        _header_params = dict(_params.get('_headers', {}))
         # process the form parameters
+        _form_params = []
+        _files = {}
         # process the body parameter
-
-
+        _body_params = None
         # set the HTTP header `Accept`
         _header_params['Accept'] = self.api_client.select_header_accept(
-            [
-                'application/json'
-            ]
-        )
-
+            ['application/json'])  # noqa: E501
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'ApiKeyAuth'
-        ]
+        _auth_settings = ['ApiKeyAuth']  # noqa: E501
 
-        return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/v1/foods/list',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
+        _response_types_map = {
+            '200': "List[AbridgedFoodItem]",
+            '400': None,
+        }
+
+        return self.api_client.call_api(
+            '/v1/foods/list', 'GET',
+            _path_params,
+            _query_params,
+            _header_params,
             body=_body_params,
             post_params=_form_params,
             files=_files,
+            response_types_map=_response_types_map,
             auth_settings=_auth_settings,
+            async_req=_params.get('async_req'),
+            _return_http_data_only=_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=_params.get('_preload_content', True),
+            _request_timeout=_params.get('_request_timeout'),
             collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
+            _request_auth=_params.get('_request_auth'))
 
+    @validate_arguments
+    def get_foods_search(self, query : Annotated[StrictStr, Field(..., description="One or more search terms.  The string may include [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2)")], data_type : Annotated[Optional[conlist(StrictStr, max_items=4, min_items=1)], Field(description="Optional. Filter on a specific data type; specify one or more values in an array.")] = None, page_size : Annotated[Optional[conint(strict=True, le=200, ge=1)], Field(description="Optional. Maximum number of results to return for the current page. Default is 50.")] = None, page_number : Annotated[Optional[StrictInt], Field(description="Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)")] = None, sort_by : Annotated[Optional[StrictStr], Field(description="Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.")] = None, sort_order : Annotated[Optional[StrictStr], Field(description="Optional. The sort direction for the results. Only applicable if sortBy is specified.")] = None, brand_owner : Annotated[Optional[StrictStr], Field(description="Optional. Filter results based on the brand owner of the food. Only applies to Branded Foods")] = None, **kwargs) -> SearchResult:  # noqa: E501
+        """Returns a list of foods that matched search (query) keywords  # noqa: E501
 
+        Search for foods using keywords. Results can be filtered by dataType and there are options for result page sizes or sorting.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def get_foods_search(
-        self,
-        query: Annotated[StrictStr, Field(description="One or more search terms.  The string may include [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2)")],
-        data_type: Annotated[Optional[Annotated[List[StrictStr], Field(min_length=1, max_length=4)]], Field(description="Optional. Filter on a specific data type; specify one or more values in an array.")] = None,
-        page_size: Annotated[Optional[Annotated[int, Field(le=200, strict=True, ge=1)]], Field(description="Optional. Maximum number of results to return for the current page. Default is 50.")] = None,
-        page_number: Annotated[Optional[StrictInt], Field(description="Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.")] = None,
-        sort_order: Annotated[Optional[StrictStr], Field(description="Optional. The sort direction for the results. Only applicable if sortBy is specified.")] = None,
-        brand_owner: Annotated[Optional[StrictStr], Field(description="Optional. Filter results based on the brand owner of the food. Only applies to Branded Foods")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> SearchResult:
-        """Returns a list of foods that matched search (query) keywords
-
-        Search for foods using keywords. Results can be filtered by dataType and there are options for result page sizes or sorting.
+        >>> thread = api.get_foods_search(query, data_type, page_size, page_number, sort_by, sort_order, brand_owner, async_req=True)
+        >>> result = thread.get()
 
         :param query: One or more search terms.  The string may include [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2) (required)
         :type query: str
@@ -1026,83 +568,33 @@ class FDCApi:
         :type sort_order: str
         :param brand_owner: Optional. Filter results based on the brand owner of the food. Only applies to Branded Foods
         :type brand_owner: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _request_timeout: timeout setting for this request.
+               If one number provided, it will be total request
+               timeout. It can also be a pair (tuple) of
+               (connection, read) timeouts.
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: SearchResult
+        """
+        kwargs['_return_http_data_only'] = True
+        if '_preload_content' in kwargs:
+            message = "Error! Please call the get_foods_search_with_http_info method with `_preload_content` instead and obtain raw data from ApiResponse.raw_data"  # noqa: E501
+            raise ValueError(message)
+        return self.get_foods_search_with_http_info(query, data_type, page_size, page_number, sort_by, sort_order, brand_owner, **kwargs)  # noqa: E501
 
-        _param = self._get_foods_search_serialize(
-            query=query,
-            data_type=data_type,
-            page_size=page_size,
-            page_number=page_number,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            brand_owner=brand_owner,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+    @validate_arguments
+    def get_foods_search_with_http_info(self, query : Annotated[StrictStr, Field(..., description="One or more search terms.  The string may include [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2)")], data_type : Annotated[Optional[conlist(StrictStr, max_items=4, min_items=1)], Field(description="Optional. Filter on a specific data type; specify one or more values in an array.")] = None, page_size : Annotated[Optional[conint(strict=True, le=200, ge=1)], Field(description="Optional. Maximum number of results to return for the current page. Default is 50.")] = None, page_number : Annotated[Optional[StrictInt], Field(description="Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)")] = None, sort_by : Annotated[Optional[StrictStr], Field(description="Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.")] = None, sort_order : Annotated[Optional[StrictStr], Field(description="Optional. The sort direction for the results. Only applicable if sortBy is specified.")] = None, brand_owner : Annotated[Optional[StrictStr], Field(description="Optional. Filter results based on the brand owner of the food. Only applies to Branded Foods")] = None, **kwargs) -> ApiResponse:  # noqa: E501
+        """Returns a list of foods that matched search (query) keywords  # noqa: E501
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SearchResult",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
+        Search for foods using keywords. Results can be filtered by dataType and there are options for result page sizes or sorting.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def get_foods_search_with_http_info(
-        self,
-        query: Annotated[StrictStr, Field(description="One or more search terms.  The string may include [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2)")],
-        data_type: Annotated[Optional[Annotated[List[StrictStr], Field(min_length=1, max_length=4)]], Field(description="Optional. Filter on a specific data type; specify one or more values in an array.")] = None,
-        page_size: Annotated[Optional[Annotated[int, Field(le=200, strict=True, ge=1)]], Field(description="Optional. Maximum number of results to return for the current page. Default is 50.")] = None,
-        page_number: Annotated[Optional[StrictInt], Field(description="Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.")] = None,
-        sort_order: Annotated[Optional[StrictStr], Field(description="Optional. The sort direction for the results. Only applicable if sortBy is specified.")] = None,
-        brand_owner: Annotated[Optional[StrictStr], Field(description="Optional. Filter results based on the brand owner of the food. Only applies to Branded Foods")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[SearchResult]:
-        """Returns a list of foods that matched search (query) keywords
-
-        Search for foods using keywords. Results can be filtered by dataType and there are options for result page sizes or sorting.
+        >>> thread = api.get_foods_search_with_http_info(query, data_type, page_size, page_number, sort_by, sort_order, brand_owner, async_req=True)
+        >>> result = thread.get()
 
         :param query: One or more search terms.  The string may include [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2) (required)
         :type query: str
@@ -1118,1524 +610,821 @@ class FDCApi:
         :type sort_order: str
         :param brand_owner: Optional. Filter results based on the brand owner of the food. Only applies to Branded Foods
         :type brand_owner: str
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _preload_content: if False, the ApiResponse.data will
+                                 be set to none and raw_data will store the
+                                 HTTP response body without reading/decoding.
+                                 Default is True.
+        :type _preload_content: bool, optional
+        :param _return_http_data_only: response data instead of ApiResponse
+                                       object with status code, headers, etc
+        :type _return_http_data_only: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
         :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
+                              request; this effectively ignores the authentication
+                              in the spec for a single request.
         :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :type _content_type: string, optional: force content-type for the request
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: tuple(SearchResult, status_code(int), headers(HTTPHeaderDict))
+        """
 
-        _param = self._get_foods_search_serialize(
-            query=query,
-            data_type=data_type,
-            page_size=page_size,
-            page_number=page_number,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            brand_owner=brand_owner,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+        _params = locals()
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SearchResult",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    def get_foods_search_without_preload_content(
-        self,
-        query: Annotated[StrictStr, Field(description="One or more search terms.  The string may include [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2)")],
-        data_type: Annotated[Optional[Annotated[List[StrictStr], Field(min_length=1, max_length=4)]], Field(description="Optional. Filter on a specific data type; specify one or more values in an array.")] = None,
-        page_size: Annotated[Optional[Annotated[int, Field(le=200, strict=True, ge=1)]], Field(description="Optional. Maximum number of results to return for the current page. Default is 50.")] = None,
-        page_number: Annotated[Optional[StrictInt], Field(description="Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.")] = None,
-        sort_order: Annotated[Optional[StrictStr], Field(description="Optional. The sort direction for the results. Only applicable if sortBy is specified.")] = None,
-        brand_owner: Annotated[Optional[StrictStr], Field(description="Optional. Filter results based on the brand owner of the food. Only applies to Branded Foods")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
+        _all_params = [
+            'query',
+            'data_type',
+            'page_size',
+            'page_number',
+            'sort_by',
+            'sort_order',
+            'brand_owner'
+        ]
+        _all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout',
+                '_request_auth',
+                '_content_type',
+                '_headers'
             ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Returns a list of foods that matched search (query) keywords
-
-        Search for foods using keywords. Results can be filtered by dataType and there are options for result page sizes or sorting.
-
-        :param query: One or more search terms.  The string may include [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2) (required)
-        :type query: str
-        :param data_type: Optional. Filter on a specific data type; specify one or more values in an array.
-        :type data_type: List[str]
-        :param page_size: Optional. Maximum number of results to return for the current page. Default is 50.
-        :type page_size: int
-        :param page_number: Optional. Page number to retrieve. The offset into the overall result set is expressed as (pageNumber * pageSize)
-        :type page_number: int
-        :param sort_by: Optional. Specify one of the possible values to sort by that field. Note, dataType.keyword will be dataType and lowercaseDescription.keyword will be description in future releases.
-        :type sort_by: str
-        :param sort_order: Optional. The sort direction for the results. Only applicable if sortBy is specified.
-        :type sort_order: str
-        :param brand_owner: Optional. Filter results based on the brand owner of the food. Only applies to Branded Foods
-        :type brand_owner: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_foods_search_serialize(
-            query=query,
-            data_type=data_type,
-            page_size=page_size,
-            page_number=page_number,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            brand_owner=brand_owner,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SearchResult",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
+        # validate the arguments
+        for _key, _val in _params['kwargs'].items():
+            if _key not in _all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_foods_search" % _key
+                )
+            _params[_key] = _val
+        del _params['kwargs']
 
-
-    def _get_foods_search_serialize(
-        self,
-        query,
-        data_type,
-        page_size,
-        page_number,
-        sort_by,
-        sort_order,
-        brand_owner,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> Tuple:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-            'dataType': 'csv',
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, str] = {}
-        _body_params: Optional[bytes] = None
+        _collection_formats = {}
 
         # process the path parameters
+        _path_params = {}
+
         # process the query parameters
-        if query is not None:
-            
-            _query_params.append(('query', query))
-            
-        if data_type is not None:
-            
-            _query_params.append(('dataType', data_type))
-            
-        if page_size is not None:
-            
-            _query_params.append(('pageSize', page_size))
-            
-        if page_number is not None:
-            
-            _query_params.append(('pageNumber', page_number))
-            
-        if sort_by is not None:
-            
-            _query_params.append(('sortBy', sort_by))
-            
-        if sort_order is not None:
-            
-            _query_params.append(('sortOrder', sort_order))
-            
-        if brand_owner is not None:
-            
-            _query_params.append(('brandOwner', brand_owner))
-            
+        _query_params = []
+        if _params.get('query') is not None:  # noqa: E501
+            _query_params.append(('query', _params['query']))
+
+        if _params.get('data_type') is not None:  # noqa: E501
+            _query_params.append(('dataType', _params['data_type']))
+            _collection_formats['dataType'] = 'csv'
+
+        if _params.get('page_size') is not None:  # noqa: E501
+            _query_params.append(('pageSize', _params['page_size']))
+
+        if _params.get('page_number') is not None:  # noqa: E501
+            _query_params.append(('pageNumber', _params['page_number']))
+
+        if _params.get('sort_by') is not None:  # noqa: E501
+            _query_params.append(('sortBy', _params['sort_by']))
+
+        if _params.get('sort_order') is not None:  # noqa: E501
+            _query_params.append(('sortOrder', _params['sort_order']))
+
+        if _params.get('brand_owner') is not None:  # noqa: E501
+            _query_params.append(('brandOwner', _params['brand_owner']))
+
         # process the header parameters
+        _header_params = dict(_params.get('_headers', {}))
         # process the form parameters
+        _form_params = []
+        _files = {}
         # process the body parameter
-
-
+        _body_params = None
         # set the HTTP header `Accept`
         _header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # authentication setting
+        _auth_settings = ['ApiKeyAuth']  # noqa: E501
+
+        _response_types_map = {
+            '200': "SearchResult",
+            '400': None,
+        }
+
+        return self.api_client.call_api(
+            '/v1/foods/search', 'GET',
+            _path_params,
+            _query_params,
+            _header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            response_types_map=_response_types_map,
+            auth_settings=_auth_settings,
+            async_req=_params.get('async_req'),
+            _return_http_data_only=_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=_params.get('_preload_content', True),
+            _request_timeout=_params.get('_request_timeout'),
+            collection_formats=_collection_formats,
+            _request_auth=_params.get('_request_auth'))
+
+    @validate_arguments
+    def get_json_spec(self, **kwargs) -> None:  # noqa: E501
+        """Returns this documentation in JSON format  # noqa: E501
+
+        The OpenAPI 3.0 specification for the FDC API rendered as JSON (JavaScript Object Notation)  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.get_json_spec(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _request_timeout: timeout setting for this request.
+               If one number provided, it will be total request
+               timeout. It can also be a pair (tuple) of
+               (connection, read) timeouts.
+        :return: Returns the result object.
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: None
+        """
+        kwargs['_return_http_data_only'] = True
+        if '_preload_content' in kwargs:
+            message = "Error! Please call the get_json_spec_with_http_info method with `_preload_content` instead and obtain raw data from ApiResponse.raw_data"  # noqa: E501
+            raise ValueError(message)
+        return self.get_json_spec_with_http_info(**kwargs)  # noqa: E501
+
+    @validate_arguments
+    def get_json_spec_with_http_info(self, **kwargs) -> ApiResponse:  # noqa: E501
+        """Returns this documentation in JSON format  # noqa: E501
+
+        The OpenAPI 3.0 specification for the FDC API rendered as JSON (JavaScript Object Notation)  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.get_json_spec_with_http_info(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _preload_content: if False, the ApiResponse.data will
+                                 be set to none and raw_data will store the
+                                 HTTP response body without reading/decoding.
+                                 Default is True.
+        :type _preload_content: bool, optional
+        :param _return_http_data_only: response data instead of ApiResponse
+                                       object with status code, headers, etc
+        :type _return_http_data_only: bool, optional
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the authentication
+                              in the spec for a single request.
+        :type _request_auth: dict, optional
+        :type _content_type: string, optional: force content-type for the request
+        :return: Returns the result object.
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: None
+        """
+
+        _params = locals()
+
+        _all_params = [
+        ]
+        _all_params.extend(
             [
-                'application/json'
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout',
+                '_request_auth',
+                '_content_type',
+                '_headers'
             ]
         )
 
+        # validate the arguments
+        for _key, _val in _params['kwargs'].items():
+            if _key not in _all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_json_spec" % _key
+                )
+            _params[_key] = _val
+        del _params['kwargs']
 
-        # authentication setting
-        _auth_settings: List[str] = [
-            'ApiKeyAuth'
-        ]
-
-        return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/v1/foods/search',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
-
-
-
-
-    @validate_call
-    def get_json_spec(
-        self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
-        """Returns this documentation in JSON format
-
-        The OpenAPI 3.0 specification for the FDC API rendered as JSON (JavaScript Object Notation)
-
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_json_spec_serialize(
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    def get_json_spec_with_http_info(
-        self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
-        """Returns this documentation in JSON format
-
-        The OpenAPI 3.0 specification for the FDC API rendered as JSON (JavaScript Object Notation)
-
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_json_spec_serialize(
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    def get_json_spec_without_preload_content(
-        self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Returns this documentation in JSON format
-
-        The OpenAPI 3.0 specification for the FDC API rendered as JSON (JavaScript Object Notation)
-
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_json_spec_serialize(
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _get_json_spec_serialize(
-        self,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> Tuple:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, str] = {}
-        _body_params: Optional[bytes] = None
+        _collection_formats = {}
 
         # process the path parameters
+        _path_params = {}
+
         # process the query parameters
+        _query_params = []
         # process the header parameters
+        _header_params = dict(_params.get('_headers', {}))
         # process the form parameters
+        _form_params = []
+        _files = {}
         # process the body parameter
-
-
-
-
+        _body_params = None
         # authentication setting
-        _auth_settings: List[str] = [
-            'ApiKeyAuth'
-        ]
+        _auth_settings = ['ApiKeyAuth']  # noqa: E501
 
-        return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/v1/json-spec',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
+        _response_types_map = {}
+
+        return self.api_client.call_api(
+            '/v1/json-spec', 'GET',
+            _path_params,
+            _query_params,
+            _header_params,
             body=_body_params,
             post_params=_form_params,
             files=_files,
+            response_types_map=_response_types_map,
             auth_settings=_auth_settings,
+            async_req=_params.get('async_req'),
+            _return_http_data_only=_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=_params.get('_preload_content', True),
+            _request_timeout=_params.get('_request_timeout'),
             collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
+            _request_auth=_params.get('_request_auth'))
 
+    @validate_arguments
+    def get_yaml_spec(self, **kwargs) -> None:  # noqa: E501
+        """Returns this documentation in JSON format  # noqa: E501
 
+        The OpenAPI 3.0 specification for the FDC API rendered as YAML (YAML Ain't Markup Language)  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
+        >>> thread = api.get_yaml_spec(async_req=True)
+        >>> result = thread.get()
 
-    @validate_call
-    def get_yaml_spec(
-        self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
-        """Returns this documentation in JSON format
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _request_timeout: timeout setting for this request.
+               If one number provided, it will be total request
+               timeout. It can also be a pair (tuple) of
+               (connection, read) timeouts.
+        :return: Returns the result object.
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: None
+        """
+        kwargs['_return_http_data_only'] = True
+        if '_preload_content' in kwargs:
+            message = "Error! Please call the get_yaml_spec_with_http_info method with `_preload_content` instead and obtain raw data from ApiResponse.raw_data"  # noqa: E501
+            raise ValueError(message)
+        return self.get_yaml_spec_with_http_info(**kwargs)  # noqa: E501
 
-        The OpenAPI 3.0 specification for the FDC API rendered as YAML (YAML Ain't Markup Language)
+    @validate_arguments
+    def get_yaml_spec_with_http_info(self, **kwargs) -> ApiResponse:  # noqa: E501
+        """Returns this documentation in JSON format  # noqa: E501
 
+        The OpenAPI 3.0 specification for the FDC API rendered as YAML (YAML Ain't Markup Language)  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.get_yaml_spec_with_http_info(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _preload_content: if False, the ApiResponse.data will
+                                 be set to none and raw_data will store the
+                                 HTTP response body without reading/decoding.
+                                 Default is True.
+        :type _preload_content: bool, optional
+        :param _return_http_data_only: response data instead of ApiResponse
+                                       object with status code, headers, etc
+        :type _return_http_data_only: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
         :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
+                              request; this effectively ignores the authentication
+                              in the spec for a single request.
         :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :type _content_type: string, optional: force content-type for the request
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: None
+        """
 
-        _param = self._get_yaml_spec_serialize(
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+        _params = locals()
 
-        _response_types_map: Dict[str, Optional[str]] = {
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    def get_yaml_spec_with_http_info(
-        self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
+        _all_params = [
+        ]
+        _all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout',
+                '_request_auth',
+                '_content_type',
+                '_headers'
             ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
-        """Returns this documentation in JSON format
-
-        The OpenAPI 3.0 specification for the FDC API rendered as YAML (YAML Ain't Markup Language)
-
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_yaml_spec_serialize(
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
+        # validate the arguments
+        for _key, _val in _params['kwargs'].items():
+            if _key not in _all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_yaml_spec" % _key
+                )
+            _params[_key] = _val
+        del _params['kwargs']
 
-
-    @validate_call
-    def get_yaml_spec_without_preload_content(
-        self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Returns this documentation in JSON format
-
-        The OpenAPI 3.0 specification for the FDC API rendered as YAML (YAML Ain't Markup Language)
-
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_yaml_spec_serialize(
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _get_yaml_spec_serialize(
-        self,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> Tuple:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, str] = {}
-        _body_params: Optional[bytes] = None
+        _collection_formats = {}
 
         # process the path parameters
+        _path_params = {}
+
         # process the query parameters
+        _query_params = []
         # process the header parameters
+        _header_params = dict(_params.get('_headers', {}))
         # process the form parameters
+        _form_params = []
+        _files = {}
         # process the body parameter
-
-
-
-
+        _body_params = None
         # authentication setting
-        _auth_settings: List[str] = [
-            'ApiKeyAuth'
-        ]
+        _auth_settings = ['ApiKeyAuth']  # noqa: E501
 
-        return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/v1/yaml-spec',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
+        _response_types_map = {}
+
+        return self.api_client.call_api(
+            '/v1/yaml-spec', 'GET',
+            _path_params,
+            _query_params,
+            _header_params,
             body=_body_params,
             post_params=_form_params,
             files=_files,
+            response_types_map=_response_types_map,
             auth_settings=_auth_settings,
+            async_req=_params.get('async_req'),
+            _return_http_data_only=_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=_params.get('_preload_content', True),
+            _request_timeout=_params.get('_request_timeout'),
             collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
+            _request_auth=_params.get('_request_auth'))
 
+    @validate_arguments
+    def post_foods(self, foods_criteria : FoodsCriteria, **kwargs) -> List[GetFoods200ResponseInner]:  # noqa: E501
+        """Fetches details for multiple food items using input FDC IDs  # noqa: E501
 
+        Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def post_foods(
-        self,
-        foods_criteria: FoodsCriteria,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[GetFoods200ResponseInner]:
-        """Fetches details for multiple food items using input FDC IDs
-
-        Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.
+        >>> thread = api.post_foods(foods_criteria, async_req=True)
+        >>> result = thread.get()
 
         :param foods_criteria: (required)
         :type foods_criteria: FoodsCriteria
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _request_timeout: timeout setting for this request.
+               If one number provided, it will be total request
+               timeout. It can also be a pair (tuple) of
+               (connection, read) timeouts.
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: List[GetFoods200ResponseInner]
+        """
+        kwargs['_return_http_data_only'] = True
+        if '_preload_content' in kwargs:
+            message = "Error! Please call the post_foods_with_http_info method with `_preload_content` instead and obtain raw data from ApiResponse.raw_data"  # noqa: E501
+            raise ValueError(message)
+        return self.post_foods_with_http_info(foods_criteria, **kwargs)  # noqa: E501
 
-        _param = self._post_foods_serialize(
-            foods_criteria=foods_criteria,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+    @validate_arguments
+    def post_foods_with_http_info(self, foods_criteria : FoodsCriteria, **kwargs) -> ApiResponse:  # noqa: E501
+        """Fetches details for multiple food items using input FDC IDs  # noqa: E501
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[GetFoods200ResponseInner]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
+        Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def post_foods_with_http_info(
-        self,
-        foods_criteria: FoodsCriteria,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[GetFoods200ResponseInner]]:
-        """Fetches details for multiple food items using input FDC IDs
-
-        Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.
+        >>> thread = api.post_foods_with_http_info(foods_criteria, async_req=True)
+        >>> result = thread.get()
 
         :param foods_criteria: (required)
         :type foods_criteria: FoodsCriteria
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _preload_content: if False, the ApiResponse.data will
+                                 be set to none and raw_data will store the
+                                 HTTP response body without reading/decoding.
+                                 Default is True.
+        :type _preload_content: bool, optional
+        :param _return_http_data_only: response data instead of ApiResponse
+                                       object with status code, headers, etc
+        :type _return_http_data_only: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
         :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
+                              request; this effectively ignores the authentication
+                              in the spec for a single request.
         :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :type _content_type: string, optional: force content-type for the request
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: tuple(List[GetFoods200ResponseInner], status_code(int), headers(HTTPHeaderDict))
+        """
 
-        _param = self._post_foods_serialize(
-            foods_criteria=foods_criteria,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
+        _params = locals()
+
+        _all_params = [
+            'foods_criteria'
+        ]
+        _all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout',
+                '_request_auth',
+                '_content_type',
+                '_headers'
+            ]
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        # validate the arguments
+        for _key, _val in _params['kwargs'].items():
+            if _key not in _all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method post_foods" % _key
+                )
+            _params[_key] = _val
+        del _params['kwargs']
+
+        _collection_formats = {}
+
+        # process the path parameters
+        _path_params = {}
+
+        # process the query parameters
+        _query_params = []
+        # process the header parameters
+        _header_params = dict(_params.get('_headers', {}))
+        # process the form parameters
+        _form_params = []
+        _files = {}
+        # process the body parameter
+        _body_params = None
+        if _params['foods_criteria'] is not None:
+            _body_params = _params['foods_criteria']
+
+        # set the HTTP header `Accept`
+        _header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # set the HTTP header `Content-Type`
+        _content_types_list = _params.get('_content_type',
+            self.api_client.select_header_content_type(
+                ['application/json']))
+        if _content_types_list:
+                _header_params['Content-Type'] = _content_types_list
+
+        # authentication setting
+        _auth_settings = ['ApiKeyAuth']  # noqa: E501
+
+        _response_types_map = {
             '200': "List[GetFoods200ResponseInner]",
             '400': None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
 
-
-    @validate_call
-    def post_foods_without_preload_content(
-        self,
-        foods_criteria: FoodsCriteria,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Fetches details for multiple food items using input FDC IDs
-
-        Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.
-
-        :param foods_criteria: (required)
-        :type foods_criteria: FoodsCriteria
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._post_foods_serialize(
-            foods_criteria=foods_criteria,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[GetFoods200ResponseInner]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _post_foods_serialize(
-        self,
-        foods_criteria,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> Tuple:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, str] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        # process the query parameters
-        # process the header parameters
-        # process the form parameters
-        # process the body parameter
-        if foods_criteria is not None:
-            _body_params = foods_criteria
-
-
-        # set the HTTP header `Accept`
-        _header_params['Accept'] = self.api_client.select_header_accept(
-            [
-                'application/json'
-            ]
-        )
-
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
-
-        # authentication setting
-        _auth_settings: List[str] = [
-            'ApiKeyAuth'
-        ]
-
-        return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/v1/foods',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
+        return self.api_client.call_api(
+            '/v1/foods', 'POST',
+            _path_params,
+            _query_params,
+            _header_params,
             body=_body_params,
             post_params=_form_params,
             files=_files,
+            response_types_map=_response_types_map,
             auth_settings=_auth_settings,
+            async_req=_params.get('async_req'),
+            _return_http_data_only=_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=_params.get('_preload_content', True),
+            _request_timeout=_params.get('_request_timeout'),
             collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
+            _request_auth=_params.get('_request_auth'))
 
+    @validate_arguments
+    def post_foods_list(self, food_list_criteria : FoodListCriteria, **kwargs) -> List[AbridgedFoodItem]:  # noqa: E501
+        """Returns a paged list of foods, in the 'abridged' format  # noqa: E501
 
+        Retrieves a paged list of foods. Use the pageNumber parameter to page through the entire result set.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def post_foods_list(
-        self,
-        food_list_criteria: FoodListCriteria,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[AbridgedFoodItem]:
-        """Returns a paged list of foods, in the 'abridged' format
-
-        Retrieves a paged list of foods. Use the pageNumber parameter to page through the entire result set.
+        >>> thread = api.post_foods_list(food_list_criteria, async_req=True)
+        >>> result = thread.get()
 
         :param food_list_criteria: (required)
         :type food_list_criteria: FoodListCriteria
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _request_timeout: timeout setting for this request.
+               If one number provided, it will be total request
+               timeout. It can also be a pair (tuple) of
+               (connection, read) timeouts.
+        :return: Returns the result object.
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: List[AbridgedFoodItem]
+        """
+        kwargs['_return_http_data_only'] = True
+        if '_preload_content' in kwargs:
+            message = "Error! Please call the post_foods_list_with_http_info method with `_preload_content` instead and obtain raw data from ApiResponse.raw_data"  # noqa: E501
+            raise ValueError(message)
+        return self.post_foods_list_with_http_info(food_list_criteria, **kwargs)  # noqa: E501
+
+    @validate_arguments
+    def post_foods_list_with_http_info(self, food_list_criteria : FoodListCriteria, **kwargs) -> ApiResponse:  # noqa: E501
+        """Returns a paged list of foods, in the 'abridged' format  # noqa: E501
+
+        Retrieves a paged list of foods. Use the pageNumber parameter to page through the entire result set.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.post_foods_list_with_http_info(food_list_criteria, async_req=True)
+        >>> result = thread.get()
+
+        :param food_list_criteria: (required)
+        :type food_list_criteria: FoodListCriteria
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _preload_content: if False, the ApiResponse.data will
+                                 be set to none and raw_data will store the
+                                 HTTP response body without reading/decoding.
+                                 Default is True.
+        :type _preload_content: bool, optional
+        :param _return_http_data_only: response data instead of ApiResponse
+                                       object with status code, headers, etc
+        :type _return_http_data_only: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
         :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
+                              request; this effectively ignores the authentication
+                              in the spec for a single request.
         :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :type _content_type: string, optional: force content-type for the request
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: tuple(List[AbridgedFoodItem], status_code(int), headers(HTTPHeaderDict))
+        """
 
-        _param = self._post_foods_list_serialize(
-            food_list_criteria=food_list_criteria,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+        _params = locals()
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[AbridgedFoodItem]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    def post_foods_list_with_http_info(
-        self,
-        food_list_criteria: FoodListCriteria,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
+        _all_params = [
+            'food_list_criteria'
+        ]
+        _all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout',
+                '_request_auth',
+                '_content_type',
+                '_headers'
             ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[AbridgedFoodItem]]:
-        """Returns a paged list of foods, in the 'abridged' format
-
-        Retrieves a paged list of foods. Use the pageNumber parameter to page through the entire result set.
-
-        :param food_list_criteria: (required)
-        :type food_list_criteria: FoodListCriteria
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._post_foods_list_serialize(
-            food_list_criteria=food_list_criteria,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[AbridgedFoodItem]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
+        # validate the arguments
+        for _key, _val in _params['kwargs'].items():
+            if _key not in _all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method post_foods_list" % _key
+                )
+            _params[_key] = _val
+        del _params['kwargs']
 
-
-    @validate_call
-    def post_foods_list_without_preload_content(
-        self,
-        food_list_criteria: FoodListCriteria,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Returns a paged list of foods, in the 'abridged' format
-
-        Retrieves a paged list of foods. Use the pageNumber parameter to page through the entire result set.
-
-        :param food_list_criteria: (required)
-        :type food_list_criteria: FoodListCriteria
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._post_foods_list_serialize(
-            food_list_criteria=food_list_criteria,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[AbridgedFoodItem]",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _post_foods_list_serialize(
-        self,
-        food_list_criteria,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> Tuple:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, str] = {}
-        _body_params: Optional[bytes] = None
+        _collection_formats = {}
 
         # process the path parameters
-        # process the query parameters
-        # process the header parameters
-        # process the form parameters
-        # process the body parameter
-        if food_list_criteria is not None:
-            _body_params = food_list_criteria
+        _path_params = {}
 
+        # process the query parameters
+        _query_params = []
+        # process the header parameters
+        _header_params = dict(_params.get('_headers', {}))
+        # process the form parameters
+        _form_params = []
+        _files = {}
+        # process the body parameter
+        _body_params = None
+        if _params['food_list_criteria'] is not None:
+            _body_params = _params['food_list_criteria']
 
         # set the HTTP header `Accept`
         _header_params['Accept'] = self.api_client.select_header_accept(
-            [
-                'application/json'
-            ]
-        )
+            ['application/json'])  # noqa: E501
 
         # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+        _content_types_list = _params.get('_content_type',
+            self.api_client.select_header_content_type(
+                ['application/json']))
+        if _content_types_list:
+                _header_params['Content-Type'] = _content_types_list
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'ApiKeyAuth'
-        ]
+        _auth_settings = ['ApiKeyAuth']  # noqa: E501
 
-        return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/v1/foods/list',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
+        _response_types_map = {
+            '200': "List[AbridgedFoodItem]",
+            '400': None,
+        }
+
+        return self.api_client.call_api(
+            '/v1/foods/list', 'POST',
+            _path_params,
+            _query_params,
+            _header_params,
             body=_body_params,
             post_params=_form_params,
             files=_files,
+            response_types_map=_response_types_map,
             auth_settings=_auth_settings,
+            async_req=_params.get('async_req'),
+            _return_http_data_only=_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=_params.get('_preload_content', True),
+            _request_timeout=_params.get('_request_timeout'),
             collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
+            _request_auth=_params.get('_request_auth'))
 
+    @validate_arguments
+    def post_foods_search(self, food_search_criteria : Annotated[FoodSearchCriteria, Field(..., description="The query string may also include standard [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2)")], **kwargs) -> SearchResult:  # noqa: E501
+        """Returns a list of foods that matched search (query) keywords  # noqa: E501
 
+        Search for foods using keywords. Results can be filtered by dataType and there are options for result page sizes or sorting.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
 
-
-    @validate_call
-    def post_foods_search(
-        self,
-        food_search_criteria: Annotated[FoodSearchCriteria, Field(description="The query string may also include standard [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2)")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> SearchResult:
-        """Returns a list of foods that matched search (query) keywords
-
-        Search for foods using keywords. Results can be filtered by dataType and there are options for result page sizes or sorting.
+        >>> thread = api.post_foods_search(food_search_criteria, async_req=True)
+        >>> result = thread.get()
 
         :param food_search_criteria: The query string may also include standard [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2) (required)
         :type food_search_criteria: FoodSearchCriteria
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _request_timeout: timeout setting for this request.
+               If one number provided, it will be total request
+               timeout. It can also be a pair (tuple) of
+               (connection, read) timeouts.
+        :return: Returns the result object.
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: SearchResult
+        """
+        kwargs['_return_http_data_only'] = True
+        if '_preload_content' in kwargs:
+            message = "Error! Please call the post_foods_search_with_http_info method with `_preload_content` instead and obtain raw data from ApiResponse.raw_data"  # noqa: E501
+            raise ValueError(message)
+        return self.post_foods_search_with_http_info(food_search_criteria, **kwargs)  # noqa: E501
+
+    @validate_arguments
+    def post_foods_search_with_http_info(self, food_search_criteria : Annotated[FoodSearchCriteria, Field(..., description="The query string may also include standard [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2)")], **kwargs) -> ApiResponse:  # noqa: E501
+        """Returns a list of foods that matched search (query) keywords  # noqa: E501
+
+        Search for foods using keywords. Results can be filtered by dataType and there are options for result page sizes or sorting.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.post_foods_search_with_http_info(food_search_criteria, async_req=True)
+        >>> result = thread.get()
+
+        :param food_search_criteria: The query string may also include standard [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2) (required)
+        :type food_search_criteria: FoodSearchCriteria
+        :param async_req: Whether to execute the request asynchronously.
+        :type async_req: bool, optional
+        :param _preload_content: if False, the ApiResponse.data will
+                                 be set to none and raw_data will store the
+                                 HTTP response body without reading/decoding.
+                                 Default is True.
+        :type _preload_content: bool, optional
+        :param _return_http_data_only: response data instead of ApiResponse
+                                       object with status code, headers, etc
+        :type _return_http_data_only: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
         :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
+                              request; this effectively ignores the authentication
+                              in the spec for a single request.
         :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
+        :type _content_type: string, optional: force content-type for the request
         :return: Returns the result object.
-        """ # noqa: E501
+                 If the method is called asynchronously,
+                 returns the request thread.
+        :rtype: tuple(SearchResult, status_code(int), headers(HTTPHeaderDict))
+        """
 
-        _param = self._post_foods_search_serialize(
-            food_search_criteria=food_search_criteria,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
+        _params = locals()
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SearchResult",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    def post_foods_search_with_http_info(
-        self,
-        food_search_criteria: Annotated[FoodSearchCriteria, Field(description="The query string may also include standard [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2)")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
+        _all_params = [
+            'food_search_criteria'
+        ]
+        _all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout',
+                '_request_auth',
+                '_content_type',
+                '_headers'
             ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[SearchResult]:
-        """Returns a list of foods that matched search (query) keywords
-
-        Search for foods using keywords. Results can be filtered by dataType and there are options for result page sizes or sorting.
-
-        :param food_search_criteria: The query string may also include standard [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2) (required)
-        :type food_search_criteria: FoodSearchCriteria
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._post_foods_search_serialize(
-            food_search_criteria=food_search_criteria,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SearchResult",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
+        # validate the arguments
+        for _key, _val in _params['kwargs'].items():
+            if _key not in _all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method post_foods_search" % _key
+                )
+            _params[_key] = _val
+        del _params['kwargs']
 
-
-    @validate_call
-    def post_foods_search_without_preload_content(
-        self,
-        food_search_criteria: Annotated[FoodSearchCriteria, Field(description="The query string may also include standard [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2)")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Returns a list of foods that matched search (query) keywords
-
-        Search for foods using keywords. Results can be filtered by dataType and there are options for result page sizes or sorting.
-
-        :param food_search_criteria: The query string may also include standard [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2) (required)
-        :type food_search_criteria: FoodSearchCriteria
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._post_foods_search_serialize(
-            food_search_criteria=food_search_criteria,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SearchResult",
-            '400': None,
-        }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _post_foods_search_serialize(
-        self,
-        food_search_criteria,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> Tuple:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, str] = {}
-        _body_params: Optional[bytes] = None
+        _collection_formats = {}
 
         # process the path parameters
-        # process the query parameters
-        # process the header parameters
-        # process the form parameters
-        # process the body parameter
-        if food_search_criteria is not None:
-            _body_params = food_search_criteria
+        _path_params = {}
 
+        # process the query parameters
+        _query_params = []
+        # process the header parameters
+        _header_params = dict(_params.get('_headers', {}))
+        # process the form parameters
+        _form_params = []
+        _files = {}
+        # process the body parameter
+        _body_params = None
+        if _params['food_search_criteria'] is not None:
+            _body_params = _params['food_search_criteria']
 
         # set the HTTP header `Accept`
         _header_params['Accept'] = self.api_client.select_header_accept(
-            [
-                'application/json'
-            ]
-        )
+            ['application/json'])  # noqa: E501
 
         # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+        _content_types_list = _params.get('_content_type',
+            self.api_client.select_header_content_type(
+                ['application/json']))
+        if _content_types_list:
+                _header_params['Content-Type'] = _content_types_list
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'ApiKeyAuth'
-        ]
+        _auth_settings = ['ApiKeyAuth']  # noqa: E501
 
-        return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/v1/foods/search',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
+        _response_types_map = {
+            '200': "SearchResult",
+            '400': None,
+        }
+
+        return self.api_client.call_api(
+            '/v1/foods/search', 'POST',
+            _path_params,
+            _query_params,
+            _header_params,
             body=_body_params,
             post_params=_form_params,
             files=_files,
+            response_types_map=_response_types_map,
             auth_settings=_auth_settings,
+            async_req=_params.get('async_req'),
+            _return_http_data_only=_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=_params.get('_preload_content', True),
+            _request_timeout=_params.get('_request_timeout'),
             collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
-
-
+            _request_auth=_params.get('_request_auth'))

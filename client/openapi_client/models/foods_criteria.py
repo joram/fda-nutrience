@@ -18,25 +18,19 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional
-from pydantic import BaseModel, StrictInt, StrictStr, field_validator
-from pydantic import Field
-from typing_extensions import Annotated
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
+from typing import List, Optional
+from pydantic import BaseModel, Field, StrictInt, StrictStr, conlist, validator
 
 class FoodsCriteria(BaseModel):
     """
-    JSON for request body of 'foods' POST request. Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.
-    """ # noqa: E501
-    fdc_ids: Optional[Annotated[List[StrictInt], Field(min_length=1, max_length=20)]] = Field(default=None, description="List of multiple FDC ID's", alias="fdcIds")
-    format: Optional[StrictStr] = Field(default=None, description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")
-    nutrients: Optional[Annotated[List[StrictInt], Field(min_length=1, max_length=25)]] = Field(default=None, description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned.  If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")
-    __properties: ClassVar[List[str]] = ["fdcIds", "format", "nutrients"]
+    JSON for request body of 'foods' POST request. Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format and nutrients can be specified. Invalid FDC ID's or ones that are not found are omitted and an empty set is returned if there are no matches.  # noqa: E501
+    """
+    fdc_ids: Optional[conlist(StrictInt, max_items=20, min_items=1)] = Field(None, alias="fdcIds", description="List of multiple FDC ID's")
+    format: Optional[StrictStr] = Field(None, description="Optional. 'abridged' for an abridged set of elements, 'full' for all elements (default).")
+    nutrients: Optional[conlist(StrictInt, max_items=25, min_items=1)] = Field(None, description="Optional. List of up to 25 nutrient numbers. Only the nutrient information for the specified nutrients will be returned.  If a food does not have any matching nutrients, the food will be returned with an empty foodNutrients element.")
+    __properties = ["fdcIds", "format", "nutrients"]
 
-    @field_validator('format')
+    @validator('format')
     def format_validate_enum(cls, value):
         """Validates the enum"""
         if value is None:
@@ -46,56 +40,43 @@ class FoodsCriteria(BaseModel):
             raise ValueError("must be one of enum values ('abridged', 'full')")
         return value
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> FoodsCriteria:
         """Create an instance of FoodsCriteria from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> FoodsCriteria:
         """Create an instance of FoodsCriteria from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return FoodsCriteria.parse_obj(obj)
 
-        _obj = cls.model_validate({
-            "fdcIds": obj.get("fdcIds"),
+        _obj = FoodsCriteria.parse_obj({
+            "fdc_ids": obj.get("fdcIds"),
             "format": obj.get("format"),
             "nutrients": obj.get("nutrients")
         })

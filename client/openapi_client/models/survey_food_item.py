@@ -18,72 +18,54 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional
-from pydantic import BaseModel, StrictInt, StrictStr
-from pydantic import Field
+from typing import List, Optional
+from pydantic import BaseModel, Field, StrictInt, StrictStr, conlist
 from openapi_client.models.food_attribute import FoodAttribute
 from openapi_client.models.food_portion import FoodPortion
 from openapi_client.models.wweia_food_category import WweiaFoodCategory
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 class SurveyFoodItem(BaseModel):
     """
     SurveyFoodItem
-    """ # noqa: E501
-    fdc_id: StrictInt = Field(alias="fdcId")
+    """
+    fdc_id: StrictInt = Field(..., alias="fdcId")
     datatype: Optional[StrictStr] = None
-    description: StrictStr
-    end_date: Optional[StrictStr] = Field(default=None, alias="endDate")
-    food_class: Optional[StrictStr] = Field(default=None, alias="foodClass")
-    food_code: Optional[StrictStr] = Field(default=None, alias="foodCode")
-    publication_date: Optional[StrictStr] = Field(default=None, alias="publicationDate")
-    start_date: Optional[StrictStr] = Field(default=None, alias="startDate")
-    food_attributes: Optional[List[FoodAttribute]] = Field(default=None, alias="foodAttributes")
-    food_portions: Optional[List[FoodPortion]] = Field(default=None, alias="foodPortions")
-    input_foods: Optional[List[InputFoodSurvey]] = Field(default=None, alias="inputFoods")
-    wweia_food_category: Optional[WweiaFoodCategory] = Field(default=None, alias="wweiaFoodCategory")
-    __properties: ClassVar[List[str]] = ["fdcId", "datatype", "description", "endDate", "foodClass", "foodCode", "publicationDate", "startDate", "foodAttributes", "foodPortions", "inputFoods", "wweiaFoodCategory"]
+    description: StrictStr = Field(...)
+    end_date: Optional[StrictStr] = Field(None, alias="endDate")
+    food_class: Optional[StrictStr] = Field(None, alias="foodClass")
+    food_code: Optional[StrictStr] = Field(None, alias="foodCode")
+    publication_date: Optional[StrictStr] = Field(None, alias="publicationDate")
+    start_date: Optional[StrictStr] = Field(None, alias="startDate")
+    food_attributes: Optional[conlist(FoodAttribute)] = Field(None, alias="foodAttributes")
+    food_portions: Optional[conlist(FoodPortion)] = Field(None, alias="foodPortions")
+    input_foods: Optional[conlist(InputFoodSurvey)] = Field(None, alias="inputFoods")
+    wweia_food_category: Optional[WweiaFoodCategory] = Field(None, alias="wweiaFoodCategory")
+    __properties = ["fdcId", "datatype", "description", "endDate", "foodClass", "foodCode", "publicationDate", "startDate", "foodAttributes", "foodPortions", "inputFoods", "wweiaFoodCategory"]
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> SurveyFoodItem:
         """Create an instance of SurveyFoodItem from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         # override the default output from pydantic by calling `to_dict()` of each item in food_attributes (list)
         _items = []
         if self.food_attributes:
@@ -111,31 +93,30 @@ class SurveyFoodItem(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> SurveyFoodItem:
         """Create an instance of SurveyFoodItem from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return SurveyFoodItem.parse_obj(obj)
 
-        _obj = cls.model_validate({
-            "fdcId": obj.get("fdcId"),
+        _obj = SurveyFoodItem.parse_obj({
+            "fdc_id": obj.get("fdcId"),
             "datatype": obj.get("datatype"),
             "description": obj.get("description"),
-            "endDate": obj.get("endDate"),
-            "foodClass": obj.get("foodClass"),
-            "foodCode": obj.get("foodCode"),
-            "publicationDate": obj.get("publicationDate"),
-            "startDate": obj.get("startDate"),
-            "foodAttributes": [FoodAttribute.from_dict(_item) for _item in obj.get("foodAttributes")] if obj.get("foodAttributes") is not None else None,
-            "foodPortions": [FoodPortion.from_dict(_item) for _item in obj.get("foodPortions")] if obj.get("foodPortions") is not None else None,
-            "inputFoods": [InputFoodSurvey.from_dict(_item) for _item in obj.get("inputFoods")] if obj.get("inputFoods") is not None else None,
-            "wweiaFoodCategory": WweiaFoodCategory.from_dict(obj.get("wweiaFoodCategory")) if obj.get("wweiaFoodCategory") is not None else None
+            "end_date": obj.get("endDate"),
+            "food_class": obj.get("foodClass"),
+            "food_code": obj.get("foodCode"),
+            "publication_date": obj.get("publicationDate"),
+            "start_date": obj.get("startDate"),
+            "food_attributes": [FoodAttribute.from_dict(_item) for _item in obj.get("foodAttributes")] if obj.get("foodAttributes") is not None else None,
+            "food_portions": [FoodPortion.from_dict(_item) for _item in obj.get("foodPortions")] if obj.get("foodPortions") is not None else None,
+            "input_foods": [InputFoodSurvey.from_dict(_item) for _item in obj.get("inputFoods")] if obj.get("inputFoods") is not None else None,
+            "wweia_food_category": WweiaFoodCategory.from_dict(obj.get("wweiaFoodCategory")) if obj.get("wweiaFoodCategory") is not None else None
         })
         return _obj
 
 from openapi_client.models.input_food_survey import InputFoodSurvey
-# TODO: Rewrite to not use raise_errors
-SurveyFoodItem.model_rebuild(raise_errors=False)
+SurveyFoodItem.update_forward_refs()
 

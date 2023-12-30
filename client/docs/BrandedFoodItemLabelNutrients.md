@@ -2,7 +2,6 @@
 
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **fat** | [**BrandedFoodItemLabelNutrientsFat**](BrandedFoodItemLabelNutrientsFat.md) |  | [optional] 

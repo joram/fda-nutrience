@@ -18,72 +18,54 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from pydantic import BaseModel, StrictFloat, StrictInt, StrictStr
-from pydantic import Field
+from typing import List, Optional, Union
+from pydantic import BaseModel, Field, StrictFloat, StrictInt, StrictStr, conlist
 from openapi_client.models.abridged_food_nutrient import AbridgedFoodNutrient
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 class SearchResultFood(BaseModel):
     """
     SearchResultFood
-    """ # noqa: E501
-    fdc_id: StrictInt = Field(description="Unique ID of the food.", alias="fdcId")
-    data_type: Optional[StrictStr] = Field(default=None, description="The type of the food data.", alias="dataType")
-    description: StrictStr = Field(description="The description of the food.")
-    food_code: Optional[StrictStr] = Field(default=None, description="Any A unique ID identifying the food within FNDDS.", alias="foodCode")
-    food_nutrients: Optional[List[AbridgedFoodNutrient]] = Field(default=None, alias="foodNutrients")
-    publication_date: Optional[StrictStr] = Field(default=None, description="Date the item was published to FDC.", alias="publicationDate")
-    scientific_name: Optional[StrictStr] = Field(default=None, description="The scientific name of the food.", alias="scientificName")
-    brand_owner: Optional[StrictStr] = Field(default=None, description="Brand owner for the food. Only applies to Branded Foods.", alias="brandOwner")
-    gtin_upc: Optional[StrictStr] = Field(default=None, description="GTIN or UPC code identifying the food. Only applies to Branded Foods.", alias="gtinUpc")
-    ingredients: Optional[StrictStr] = Field(default=None, description="The list of ingredients (as it appears on the product label). Only applies to Branded Foods.")
-    ndb_number: Optional[StrictInt] = Field(default=None, description="Unique number assigned for foundation foods. Only applies to Foundation and SRLegacy Foods.", alias="ndbNumber")
-    additional_descriptions: Optional[StrictStr] = Field(default=None, description="Any additional descriptions of the food.", alias="additionalDescriptions")
-    all_highlight_fields: Optional[StrictStr] = Field(default=None, description="allHighlightFields", alias="allHighlightFields")
-    score: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Relative score indicating how well the food matches the search criteria.")
-    __properties: ClassVar[List[str]] = ["fdcId", "dataType", "description", "foodCode", "foodNutrients", "publicationDate", "scientificName", "brandOwner", "gtinUpc", "ingredients", "ndbNumber", "additionalDescriptions", "allHighlightFields", "score"]
+    """
+    fdc_id: StrictInt = Field(..., alias="fdcId", description="Unique ID of the food.")
+    data_type: Optional[StrictStr] = Field(None, alias="dataType", description="The type of the food data.")
+    description: StrictStr = Field(..., description="The description of the food.")
+    food_code: Optional[StrictStr] = Field(None, alias="foodCode", description="Any A unique ID identifying the food within FNDDS.")
+    food_nutrients: Optional[conlist(AbridgedFoodNutrient)] = Field(None, alias="foodNutrients")
+    publication_date: Optional[StrictStr] = Field(None, alias="publicationDate", description="Date the item was published to FDC.")
+    scientific_name: Optional[StrictStr] = Field(None, alias="scientificName", description="The scientific name of the food.")
+    brand_owner: Optional[StrictStr] = Field(None, alias="brandOwner", description="Brand owner for the food. Only applies to Branded Foods.")
+    gtin_upc: Optional[StrictStr] = Field(None, alias="gtinUpc", description="GTIN or UPC code identifying the food. Only applies to Branded Foods.")
+    ingredients: Optional[StrictStr] = Field(None, description="The list of ingredients (as it appears on the product label). Only applies to Branded Foods.")
+    ndb_number: Optional[StrictInt] = Field(None, alias="ndbNumber", description="Unique number assigned for foundation foods. Only applies to Foundation and SRLegacy Foods.")
+    additional_descriptions: Optional[StrictStr] = Field(None, alias="additionalDescriptions", description="Any additional descriptions of the food.")
+    all_highlight_fields: Optional[StrictStr] = Field(None, alias="allHighlightFields", description="allHighlightFields")
+    score: Optional[Union[StrictFloat, StrictInt]] = Field(None, description="Relative score indicating how well the food matches the search criteria.")
+    __properties = ["fdcId", "dataType", "description", "foodCode", "foodNutrients", "publicationDate", "scientificName", "brandOwner", "gtinUpc", "ingredients", "ndbNumber", "additionalDescriptions", "allHighlightFields", "score"]
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> SearchResultFood:
         """Create an instance of SearchResultFood from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         # override the default output from pydantic by calling `to_dict()` of each item in food_nutrients (list)
         _items = []
         if self.food_nutrients:
@@ -94,28 +76,28 @@ class SearchResultFood(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> SearchResultFood:
         """Create an instance of SearchResultFood from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return SearchResultFood.parse_obj(obj)
 
-        _obj = cls.model_validate({
-            "fdcId": obj.get("fdcId"),
-            "dataType": obj.get("dataType"),
+        _obj = SearchResultFood.parse_obj({
+            "fdc_id": obj.get("fdcId"),
+            "data_type": obj.get("dataType"),
             "description": obj.get("description"),
-            "foodCode": obj.get("foodCode"),
-            "foodNutrients": [AbridgedFoodNutrient.from_dict(_item) for _item in obj.get("foodNutrients")] if obj.get("foodNutrients") is not None else None,
-            "publicationDate": obj.get("publicationDate"),
-            "scientificName": obj.get("scientificName"),
-            "brandOwner": obj.get("brandOwner"),
-            "gtinUpc": obj.get("gtinUpc"),
+            "food_code": obj.get("foodCode"),
+            "food_nutrients": [AbridgedFoodNutrient.from_dict(_item) for _item in obj.get("foodNutrients")] if obj.get("foodNutrients") is not None else None,
+            "publication_date": obj.get("publicationDate"),
+            "scientific_name": obj.get("scientificName"),
+            "brand_owner": obj.get("brandOwner"),
+            "gtin_upc": obj.get("gtinUpc"),
             "ingredients": obj.get("ingredients"),
-            "ndbNumber": obj.get("ndbNumber"),
-            "additionalDescriptions": obj.get("additionalDescriptions"),
-            "allHighlightFields": obj.get("allHighlightFields"),
+            "ndb_number": obj.get("ndbNumber"),
+            "additional_descriptions": obj.get("additionalDescriptions"),
+            "all_highlight_fields": obj.get("allHighlightFields"),
             "score": obj.get("score")
         })
         return _obj

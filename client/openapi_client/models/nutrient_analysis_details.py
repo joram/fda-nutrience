@@ -18,66 +18,48 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from pydantic import BaseModel, StrictFloat, StrictInt, StrictStr
-from pydantic import Field
+from typing import List, Optional, Union
+from pydantic import BaseModel, Field, StrictFloat, StrictInt, StrictStr, conlist
 from openapi_client.models.nutrient_acquisition_details import NutrientAcquisitionDetails
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 class NutrientAnalysisDetails(BaseModel):
     """
     NutrientAnalysisDetails
-    """ # noqa: E501
-    sub_sample_id: Optional[StrictInt] = Field(default=None, alias="subSampleId")
+    """
+    sub_sample_id: Optional[StrictInt] = Field(None, alias="subSampleId")
     amount: Optional[Union[StrictFloat, StrictInt]] = None
-    nutrient_id: Optional[StrictInt] = Field(default=None, alias="nutrientId")
-    lab_method_description: Optional[StrictStr] = Field(default=None, alias="labMethodDescription")
-    lab_method_original_description: Optional[StrictStr] = Field(default=None, alias="labMethodOriginalDescription")
-    lab_method_link: Optional[StrictStr] = Field(default=None, alias="labMethodLink")
-    lab_method_technique: Optional[StrictStr] = Field(default=None, alias="labMethodTechnique")
-    nutrient_acquisition_details: Optional[List[NutrientAcquisitionDetails]] = Field(default=None, alias="nutrientAcquisitionDetails")
-    __properties: ClassVar[List[str]] = ["subSampleId", "amount", "nutrientId", "labMethodDescription", "labMethodOriginalDescription", "labMethodLink", "labMethodTechnique", "nutrientAcquisitionDetails"]
+    nutrient_id: Optional[StrictInt] = Field(None, alias="nutrientId")
+    lab_method_description: Optional[StrictStr] = Field(None, alias="labMethodDescription")
+    lab_method_original_description: Optional[StrictStr] = Field(None, alias="labMethodOriginalDescription")
+    lab_method_link: Optional[StrictStr] = Field(None, alias="labMethodLink")
+    lab_method_technique: Optional[StrictStr] = Field(None, alias="labMethodTechnique")
+    nutrient_acquisition_details: Optional[conlist(NutrientAcquisitionDetails)] = Field(None, alias="nutrientAcquisitionDetails")
+    __properties = ["subSampleId", "amount", "nutrientId", "labMethodDescription", "labMethodOriginalDescription", "labMethodLink", "labMethodTechnique", "nutrientAcquisitionDetails"]
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> NutrientAnalysisDetails:
         """Create an instance of NutrientAnalysisDetails from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         # override the default output from pydantic by calling `to_dict()` of each item in nutrient_acquisition_details (list)
         _items = []
         if self.nutrient_acquisition_details:
@@ -88,23 +70,23 @@ class NutrientAnalysisDetails(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> NutrientAnalysisDetails:
         """Create an instance of NutrientAnalysisDetails from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return NutrientAnalysisDetails.parse_obj(obj)
 
-        _obj = cls.model_validate({
-            "subSampleId": obj.get("subSampleId"),
+        _obj = NutrientAnalysisDetails.parse_obj({
+            "sub_sample_id": obj.get("subSampleId"),
             "amount": obj.get("amount"),
-            "nutrientId": obj.get("nutrientId"),
-            "labMethodDescription": obj.get("labMethodDescription"),
-            "labMethodOriginalDescription": obj.get("labMethodOriginalDescription"),
-            "labMethodLink": obj.get("labMethodLink"),
-            "labMethodTechnique": obj.get("labMethodTechnique"),
-            "nutrientAcquisitionDetails": [NutrientAcquisitionDetails.from_dict(_item) for _item in obj.get("nutrientAcquisitionDetails")] if obj.get("nutrientAcquisitionDetails") is not None else None
+            "nutrient_id": obj.get("nutrientId"),
+            "lab_method_description": obj.get("labMethodDescription"),
+            "lab_method_original_description": obj.get("labMethodOriginalDescription"),
+            "lab_method_link": obj.get("labMethodLink"),
+            "lab_method_technique": obj.get("labMethodTechnique"),
+            "nutrient_acquisition_details": [NutrientAcquisitionDetails.from_dict(_item) for _item in obj.get("nutrientAcquisitionDetails")] if obj.get("nutrientAcquisitionDetails") is not None else None
         })
         return _obj
 

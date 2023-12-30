@@ -18,67 +18,49 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional
-from pydantic import BaseModel, StrictInt, StrictStr
-from pydantic import Field
+from typing import List, Optional
+from pydantic import BaseModel, Field, StrictInt, StrictStr, conlist
 from openapi_client.models.abridged_food_nutrient import AbridgedFoodNutrient
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 class AbridgedFoodItem(BaseModel):
     """
     AbridgedFoodItem
-    """ # noqa: E501
-    data_type: StrictStr = Field(alias="dataType")
-    description: StrictStr
-    fdc_id: StrictInt = Field(alias="fdcId")
-    food_nutrients: Optional[List[AbridgedFoodNutrient]] = Field(default=None, alias="foodNutrients")
-    publication_date: Optional[StrictStr] = Field(default=None, alias="publicationDate")
-    brand_owner: Optional[StrictStr] = Field(default=None, description="only applies to Branded Foods", alias="brandOwner")
-    gtin_upc: Optional[StrictStr] = Field(default=None, description="only applies to Branded Foods", alias="gtinUpc")
-    ndb_number: Optional[StrictInt] = Field(default=None, description="only applies to Foundation and SRLegacy Foods", alias="ndbNumber")
-    food_code: Optional[StrictStr] = Field(default=None, description="only applies to Survey Foods", alias="foodCode")
-    __properties: ClassVar[List[str]] = ["dataType", "description", "fdcId", "foodNutrients", "publicationDate", "brandOwner", "gtinUpc", "ndbNumber", "foodCode"]
+    """
+    data_type: StrictStr = Field(..., alias="dataType")
+    description: StrictStr = Field(...)
+    fdc_id: StrictInt = Field(..., alias="fdcId")
+    food_nutrients: Optional[conlist(AbridgedFoodNutrient)] = Field(None, alias="foodNutrients")
+    publication_date: Optional[StrictStr] = Field(None, alias="publicationDate")
+    brand_owner: Optional[StrictStr] = Field(None, alias="brandOwner", description="only applies to Branded Foods")
+    gtin_upc: Optional[StrictStr] = Field(None, alias="gtinUpc", description="only applies to Branded Foods")
+    ndb_number: Optional[StrictInt] = Field(None, alias="ndbNumber", description="only applies to Foundation and SRLegacy Foods")
+    food_code: Optional[StrictStr] = Field(None, alias="foodCode", description="only applies to Survey Foods")
+    __properties = ["dataType", "description", "fdcId", "foodNutrients", "publicationDate", "brandOwner", "gtinUpc", "ndbNumber", "foodCode"]
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> AbridgedFoodItem:
         """Create an instance of AbridgedFoodItem from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         # override the default output from pydantic by calling `to_dict()` of each item in food_nutrients (list)
         _items = []
         if self.food_nutrients:
@@ -89,24 +71,24 @@ class AbridgedFoodItem(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> AbridgedFoodItem:
         """Create an instance of AbridgedFoodItem from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return AbridgedFoodItem.parse_obj(obj)
 
-        _obj = cls.model_validate({
-            "dataType": obj.get("dataType"),
+        _obj = AbridgedFoodItem.parse_obj({
+            "data_type": obj.get("dataType"),
             "description": obj.get("description"),
-            "fdcId": obj.get("fdcId"),
-            "foodNutrients": [AbridgedFoodNutrient.from_dict(_item) for _item in obj.get("foodNutrients")] if obj.get("foodNutrients") is not None else None,
-            "publicationDate": obj.get("publicationDate"),
-            "brandOwner": obj.get("brandOwner"),
-            "gtinUpc": obj.get("gtinUpc"),
-            "ndbNumber": obj.get("ndbNumber"),
-            "foodCode": obj.get("foodCode")
+            "fdc_id": obj.get("fdcId"),
+            "food_nutrients": [AbridgedFoodNutrient.from_dict(_item) for _item in obj.get("foodNutrients")] if obj.get("foodNutrients") is not None else None,
+            "publication_date": obj.get("publicationDate"),
+            "brand_owner": obj.get("brandOwner"),
+            "gtin_upc": obj.get("gtinUpc"),
+            "ndb_number": obj.get("ndbNumber"),
+            "food_code": obj.get("foodCode")
         })
         return _obj
 

@@ -18,91 +18,73 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from pydantic import BaseModel, StrictFloat, StrictInt, StrictStr
-from pydantic import Field
+from typing import Optional, Union
+from pydantic import BaseModel, Field, StrictFloat, StrictInt, StrictStr
 from openapi_client.models.measure_unit import MeasureUnit
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 class FoodPortion(BaseModel):
     """
     FoodPortion
-    """ # noqa: E501
+    """
     id: Optional[StrictInt] = None
     amount: Optional[Union[StrictFloat, StrictInt]] = None
-    data_points: Optional[StrictInt] = Field(default=None, alias="dataPoints")
-    gram_weight: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="gramWeight")
-    min_year_acquired: Optional[StrictInt] = Field(default=None, alias="minYearAcquired")
+    data_points: Optional[StrictInt] = Field(None, alias="dataPoints")
+    gram_weight: Optional[Union[StrictFloat, StrictInt]] = Field(None, alias="gramWeight")
+    min_year_acquired: Optional[StrictInt] = Field(None, alias="minYearAcquired")
     modifier: Optional[StrictStr] = None
-    portion_description: Optional[StrictStr] = Field(default=None, alias="portionDescription")
-    sequence_number: Optional[StrictInt] = Field(default=None, alias="sequenceNumber")
-    measure_unit: Optional[MeasureUnit] = Field(default=None, alias="measureUnit")
-    __properties: ClassVar[List[str]] = ["id", "amount", "dataPoints", "gramWeight", "minYearAcquired", "modifier", "portionDescription", "sequenceNumber", "measureUnit"]
+    portion_description: Optional[StrictStr] = Field(None, alias="portionDescription")
+    sequence_number: Optional[StrictInt] = Field(None, alias="sequenceNumber")
+    measure_unit: Optional[MeasureUnit] = Field(None, alias="measureUnit")
+    __properties = ["id", "amount", "dataPoints", "gramWeight", "minYearAcquired", "modifier", "portionDescription", "sequenceNumber", "measureUnit"]
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> FoodPortion:
         """Create an instance of FoodPortion from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         # override the default output from pydantic by calling `to_dict()` of measure_unit
         if self.measure_unit:
             _dict['measureUnit'] = self.measure_unit.to_dict()
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> FoodPortion:
         """Create an instance of FoodPortion from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return FoodPortion.parse_obj(obj)
 
-        _obj = cls.model_validate({
+        _obj = FoodPortion.parse_obj({
             "id": obj.get("id"),
             "amount": obj.get("amount"),
-            "dataPoints": obj.get("dataPoints"),
-            "gramWeight": obj.get("gramWeight"),
-            "minYearAcquired": obj.get("minYearAcquired"),
+            "data_points": obj.get("dataPoints"),
+            "gram_weight": obj.get("gramWeight"),
+            "min_year_acquired": obj.get("minYearAcquired"),
             "modifier": obj.get("modifier"),
-            "portionDescription": obj.get("portionDescription"),
-            "sequenceNumber": obj.get("sequenceNumber"),
-            "measureUnit": MeasureUnit.from_dict(obj.get("measureUnit")) if obj.get("measureUnit") is not None else None
+            "portion_description": obj.get("portionDescription"),
+            "sequence_number": obj.get("sequenceNumber"),
+            "measure_unit": MeasureUnit.from_dict(obj.get("measureUnit")) if obj.get("measureUnit") is not None else None
         })
         return _obj
 

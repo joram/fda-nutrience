@@ -3,7 +3,6 @@
 JSON for request body of 'list' POST request
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **data_type** | **List[str]** | Optional. Filter on a specific data type; specify one or more values in an array. | [optional] 

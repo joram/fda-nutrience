@@ -18,9 +18,8 @@ import re  # noqa: F401
 import json
 
 
-from typing import Any, ClassVar, Dict, List, Optional
-from pydantic import BaseModel
-from pydantic import Field
+from typing import Optional
+from pydantic import BaseModel, Field
 from openapi_client.models.branded_food_item_label_nutrients_calcium import BrandedFoodItemLabelNutrientsCalcium
 from openapi_client.models.branded_food_item_label_nutrients_calories import BrandedFoodItemLabelNutrientsCalories
 from openapi_client.models.branded_food_item_label_nutrients_carbohydrates import BrandedFoodItemLabelNutrientsCarbohydrates
@@ -32,18 +31,14 @@ from openapi_client.models.branded_food_item_label_nutrients_protein import Bran
 from openapi_client.models.branded_food_item_label_nutrients_saturated_fat import BrandedFoodItemLabelNutrientsSaturatedFat
 from openapi_client.models.branded_food_item_label_nutrients_sugars import BrandedFoodItemLabelNutrientsSugars
 from openapi_client.models.branded_food_item_label_nutrients_trans_fat import BrandedFoodItemLabelNutrientsTransFat
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
 
 class BrandedFoodItemLabelNutrients(BaseModel):
     """
     BrandedFoodItemLabelNutrients
-    """ # noqa: E501
+    """
     fat: Optional[BrandedFoodItemLabelNutrientsFat] = None
-    saturated_fat: Optional[BrandedFoodItemLabelNutrientsSaturatedFat] = Field(default=None, alias="saturatedFat")
-    trans_fat: Optional[BrandedFoodItemLabelNutrientsTransFat] = Field(default=None, alias="transFat")
+    saturated_fat: Optional[BrandedFoodItemLabelNutrientsSaturatedFat] = Field(None, alias="saturatedFat")
+    trans_fat: Optional[BrandedFoodItemLabelNutrientsTransFat] = Field(None, alias="transFat")
     cholesterol: Optional[BrandedFoodItemLabelNutrientsTransFat] = None
     sodium: Optional[BrandedFoodItemLabelNutrientsTransFat] = None
     carbohydrates: Optional[BrandedFoodItemLabelNutrientsCarbohydrates] = None
@@ -54,45 +49,32 @@ class BrandedFoodItemLabelNutrients(BaseModel):
     iron: Optional[BrandedFoodItemLabelNutrientsIron] = None
     potassium: Optional[BrandedFoodItemLabelNutrientsPotassium] = None
     calories: Optional[BrandedFoodItemLabelNutrientsCalories] = None
-    __properties: ClassVar[List[str]] = ["fat", "saturatedFat", "transFat", "cholesterol", "sodium", "carbohydrates", "fiber", "sugars", "protein", "calcium", "iron", "potassium", "calories"]
+    __properties = ["fat", "saturatedFat", "transFat", "cholesterol", "sodium", "carbohydrates", "fiber", "sugars", "protein", "calcium", "iron", "potassium", "calories"]
 
-    model_config = {
-        "populate_by_name": True,
-        "validate_assignment": True,
-        "protected_namespaces": (),
-    }
-
+    class Config:
+        """Pydantic configuration"""
+        allow_population_by_field_name = True
+        validate_assignment = True
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
-        return pprint.pformat(self.model_dump(by_alias=True))
+        return pprint.pformat(self.dict(by_alias=True))
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self:
+    def from_json(cls, json_str: str) -> BrandedFoodItemLabelNutrients:
         """Create an instance of BrandedFoodItemLabelNutrients from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation of the model using alias.
-
-        This has the following differences from calling pydantic's
-        `self.model_dump(by_alias=True)`:
-
-        * `None` is only added to the output dict for nullable fields that
-          were set at model initialization. Other fields with value `None`
-          are ignored.
-        """
-        _dict = self.model_dump(
-            by_alias=True,
-            exclude={
-            },
-            exclude_none=True,
-        )
+    def to_dict(self):
+        """Returns the dictionary representation of the model using alias"""
+        _dict = self.dict(by_alias=True,
+                          exclude={
+                          },
+                          exclude_none=True)
         # override the default output from pydantic by calling `to_dict()` of fat
         if self.fat:
             _dict['fat'] = self.fat.to_dict()
@@ -135,18 +117,18 @@ class BrandedFoodItemLabelNutrients(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Dict) -> Self:
+    def from_dict(cls, obj: dict) -> BrandedFoodItemLabelNutrients:
         """Create an instance of BrandedFoodItemLabelNutrients from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
-            return cls.model_validate(obj)
+            return BrandedFoodItemLabelNutrients.parse_obj(obj)
 
-        _obj = cls.model_validate({
+        _obj = BrandedFoodItemLabelNutrients.parse_obj({
             "fat": BrandedFoodItemLabelNutrientsFat.from_dict(obj.get("fat")) if obj.get("fat") is not None else None,
-            "saturatedFat": BrandedFoodItemLabelNutrientsSaturatedFat.from_dict(obj.get("saturatedFat")) if obj.get("saturatedFat") is not None else None,
-            "transFat": BrandedFoodItemLabelNutrientsTransFat.from_dict(obj.get("transFat")) if obj.get("transFat") is not None else None,
+            "saturated_fat": BrandedFoodItemLabelNutrientsSaturatedFat.from_dict(obj.get("saturatedFat")) if obj.get("saturatedFat") is not None else None,
+            "trans_fat": BrandedFoodItemLabelNutrientsTransFat.from_dict(obj.get("transFat")) if obj.get("transFat") is not None else None,
             "cholesterol": BrandedFoodItemLabelNutrientsTransFat.from_dict(obj.get("cholesterol")) if obj.get("cholesterol") is not None else None,
             "sodium": BrandedFoodItemLabelNutrientsTransFat.from_dict(obj.get("sodium")) if obj.get("sodium") is not None else None,
             "carbohydrates": BrandedFoodItemLabelNutrientsCarbohydrates.from_dict(obj.get("carbohydrates")) if obj.get("carbohydrates") is not None else None,

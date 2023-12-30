@@ -25,7 +25,6 @@ Retrieves a single food item by an FDC ID. Optional format and nutrients can be 
 ### Example
 
 * Api Key Authentication (ApiKeyAuth):
-
 ```python
 import time
 import os
@@ -72,7 +71,6 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **fdc_id** | **str**| FDC id of the food to retrieve | 
@@ -93,7 +91,6 @@ Name | Type | Description  | Notes
  - **Accept**: application/json
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | One food result. |  -  |
@@ -112,7 +109,6 @@ Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format an
 ### Example
 
 * Api Key Authentication (ApiKeyAuth):
-
 ```python
 import time
 import os
@@ -159,7 +155,6 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **fdc_ids** | [**List[str]**](str.md)| List of multiple FDC ID&#39;s. Should be comma separated list (e.g. fdcIds&#x3D;534358,373052) or repeating parameters (e.g. fdcIds&#x3D;534358&amp;fdcIds&#x3D;373052). | 
@@ -180,7 +175,6 @@ Name | Type | Description  | Notes
  - **Accept**: application/json
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of Food details matching specified FDC ID&#39;s. Invalid FDC ID&#39;s or ones that are not found are omitted. |  -  |
@@ -198,7 +192,6 @@ Retrieves a paged list of foods. Use the pageNumber parameter to page through th
 ### Example
 
 * Api Key Authentication (ApiKeyAuth):
-
 ```python
 import time
 import os
@@ -247,7 +240,6 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **data_type** | [**List[str]**](str.md)| Optional. Filter on a specific data type; specify one or more values in an array. | [optional] 
@@ -270,7 +262,6 @@ Name | Type | Description  | Notes
  - **Accept**: application/json
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of foods for the requested page |  -  |
@@ -288,7 +279,6 @@ Search for foods using keywords. Results can be filtered by dataType and there a
 ### Example
 
 * Api Key Authentication (ApiKeyAuth):
-
 ```python
 import time
 import os
@@ -339,7 +329,6 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **query** | **str**| One or more search terms.  The string may include [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2) | 
@@ -364,7 +353,6 @@ Name | Type | Description  | Notes
  - **Accept**: application/json
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of foods that matched search terms |  -  |
@@ -382,7 +370,6 @@ The OpenAPI 3.0 specification for the FDC API rendered as JSON (JavaScript Objec
 ### Example
 
 * Api Key Authentication (ApiKeyAuth):
-
 ```python
 import time
 import os
@@ -422,7 +409,6 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 
 ### Parameters
-
 This endpoint does not need any parameter.
 
 ### Return type
@@ -439,7 +425,6 @@ void (empty response body)
  - **Accept**: Not defined
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **0** | JSON rendering of OpenAPI 3.0 specification |  -  |
@@ -456,7 +441,6 @@ The OpenAPI 3.0 specification for the FDC API rendered as YAML (YAML Ain't Marku
 ### Example
 
 * Api Key Authentication (ApiKeyAuth):
-
 ```python
 import time
 import os
@@ -496,7 +480,6 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 
 ### Parameters
-
 This endpoint does not need any parameter.
 
 ### Return type
@@ -513,7 +496,6 @@ void (empty response body)
  - **Accept**: Not defined
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **0** | YAML rendering of OpenAPI 3.0 specification |  -  |
@@ -530,7 +512,6 @@ Retrieves a list of food items by a list of up to 20 FDC IDs. Optional format an
 ### Example
 
 * Api Key Authentication (ApiKeyAuth):
-
 ```python
 import time
 import os
@@ -576,7 +557,6 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **foods_criteria** | [**FoodsCriteria**](FoodsCriteria.md)|  | 
@@ -595,7 +575,6 @@ Name | Type | Description  | Notes
  - **Accept**: application/json
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of Food details matching specified FDC ID&#39;s. Invalid FDC ID&#39;s or ones that are not found are omitted. |  -  |
@@ -613,7 +592,6 @@ Retrieves a paged list of foods. Use the pageNumber parameter to page through th
 ### Example
 
 * Api Key Authentication (ApiKeyAuth):
-
 ```python
 import time
 import os
@@ -659,7 +637,6 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **food_list_criteria** | [**FoodListCriteria**](FoodListCriteria.md)|  | 
@@ -678,7 +655,6 @@ Name | Type | Description  | Notes
  - **Accept**: application/json
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of foods for the requested page |  -  |
@@ -696,7 +672,6 @@ Search for foods using keywords. Results can be filtered by dataType and there a
 ### Example
 
 * Api Key Authentication (ApiKeyAuth):
-
 ```python
 import time
 import os
@@ -742,7 +717,6 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **food_search_criteria** | [**FoodSearchCriteria**](FoodSearchCriteria.md)| The query string may also include standard [search operators](https://fdc.nal.usda.gov/help.html#bkmk-2) | 
@@ -761,7 +735,6 @@ Name | Type | Description  | Notes
  - **Accept**: application/json
 
 ### HTTP response details
-
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List of foods that matched search terms |  -  |
