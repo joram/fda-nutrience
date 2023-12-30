@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.food_nutrient_derivation import FoodNutrientDerivation
+from openapi_client.models.food_nutrient_derivation import FoodNutrientDerivation  # noqa: E501
 
 class TestFoodNutrientDerivation(unittest.TestCase):
     """FoodNutrientDerivation unit test stubs"""
@@ -33,7 +33,7 @@ class TestFoodNutrientDerivation(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `FoodNutrientDerivation`
         """
-        model = FoodNutrientDerivation()
+        model = FoodNutrientDerivation()  # noqa: E501
         if include_optional:
             return FoodNutrientDerivation(
                 id = 75,

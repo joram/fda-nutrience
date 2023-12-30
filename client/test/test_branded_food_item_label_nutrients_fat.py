@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.branded_food_item_label_nutrients_fat import BrandedFoodItemLabelNutrientsFat
+from openapi_client.models.branded_food_item_label_nutrients_fat import BrandedFoodItemLabelNutrientsFat  # noqa: E501
 
 class TestBrandedFoodItemLabelNutrientsFat(unittest.TestCase):
     """BrandedFoodItemLabelNutrientsFat unit test stubs"""
@@ -33,7 +33,7 @@ class TestBrandedFoodItemLabelNutrientsFat(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `BrandedFoodItemLabelNutrientsFat`
         """
-        model = BrandedFoodItemLabelNutrientsFat()
+        model = BrandedFoodItemLabelNutrientsFat()  # noqa: E501
         if include_optional:
             return BrandedFoodItemLabelNutrientsFat(
                 value = 8.9992

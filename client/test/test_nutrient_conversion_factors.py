@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.nutrient_conversion_factors import NutrientConversionFactors
+from openapi_client.models.nutrient_conversion_factors import NutrientConversionFactors  # noqa: E501
 
 class TestNutrientConversionFactors(unittest.TestCase):
     """NutrientConversionFactors unit test stubs"""
@@ -33,7 +33,7 @@ class TestNutrientConversionFactors(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `NutrientConversionFactors`
         """
-        model = NutrientConversionFactors()
+        model = NutrientConversionFactors()  # noqa: E501
         if include_optional:
             return NutrientConversionFactors(
                 type = '.ProteinConversionFactor',

@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.branded_food_item_label_nutrients_potassium import BrandedFoodItemLabelNutrientsPotassium
+from openapi_client.models.branded_food_item_label_nutrients_potassium import BrandedFoodItemLabelNutrientsPotassium  # noqa: E501
 
 class TestBrandedFoodItemLabelNutrientsPotassium(unittest.TestCase):
     """BrandedFoodItemLabelNutrientsPotassium unit test stubs"""
@@ -33,7 +33,7 @@ class TestBrandedFoodItemLabelNutrientsPotassium(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `BrandedFoodItemLabelNutrientsPotassium`
         """
-        model = BrandedFoodItemLabelNutrientsPotassium()
+        model = BrandedFoodItemLabelNutrientsPotassium()  # noqa: E501
         if include_optional:
             return BrandedFoodItemLabelNutrientsPotassium(
                 value = 159.88

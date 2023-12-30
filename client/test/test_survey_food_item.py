@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.survey_food_item import SurveyFoodItem
+from openapi_client.models.survey_food_item import SurveyFoodItem  # noqa: E501
 
 class TestSurveyFoodItem(unittest.TestCase):
     """SurveyFoodItem unit test stubs"""
@@ -33,7 +33,7 @@ class TestSurveyFoodItem(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `SurveyFoodItem`
         """
-        model = SurveyFoodItem()
+        model = SurveyFoodItem()  # noqa: E501
         if include_optional:
             return SurveyFoodItem(
                 fdc_id = 337985,

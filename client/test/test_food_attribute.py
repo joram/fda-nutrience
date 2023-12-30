@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.food_attribute import FoodAttribute
+from openapi_client.models.food_attribute import FoodAttribute  # noqa: E501
 
 class TestFoodAttribute(unittest.TestCase):
     """FoodAttribute unit test stubs"""
@@ -33,7 +33,7 @@ class TestFoodAttribute(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `FoodAttribute`
         """
-        model = FoodAttribute()
+        model = FoodAttribute()  # noqa: E501
         if include_optional:
             return FoodAttribute(
                 id = 25117,

@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.foundation_food_item import FoundationFoodItem
+from openapi_client.models.foundation_food_item import FoundationFoodItem  # noqa: E501
 
 class TestFoundationFoodItem(unittest.TestCase):
     """FoundationFoodItem unit test stubs"""
@@ -33,7 +33,7 @@ class TestFoundationFoodItem(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `FoundationFoodItem`
         """
-        model = FoundationFoodItem()
+        model = FoundationFoodItem()  # noqa: E501
         if include_optional:
             return FoundationFoodItem(
                 fdc_id = 747448,

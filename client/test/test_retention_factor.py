@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.retention_factor import RetentionFactor
+from openapi_client.models.retention_factor import RetentionFactor  # noqa: E501
 
 class TestRetentionFactor(unittest.TestCase):
     """RetentionFactor unit test stubs"""
@@ -33,7 +33,7 @@ class TestRetentionFactor(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `RetentionFactor`
         """
-        model = RetentionFactor()
+        model = RetentionFactor()  # noqa: E501
         if include_optional:
             return RetentionFactor(
                 id = 235,

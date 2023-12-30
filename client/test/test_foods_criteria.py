@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.foods_criteria import FoodsCriteria
+from openapi_client.models.foods_criteria import FoodsCriteria  # noqa: E501
 
 class TestFoodsCriteria(unittest.TestCase):
     """FoodsCriteria unit test stubs"""
@@ -33,7 +33,7 @@ class TestFoodsCriteria(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `FoodsCriteria`
         """
-        model = FoodsCriteria()
+        model = FoodsCriteria()  # noqa: E501
         if include_optional:
             return FoodsCriteria(
                 fdc_ids = [534358,373052,616350],

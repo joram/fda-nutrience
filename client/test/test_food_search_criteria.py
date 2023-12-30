@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.food_search_criteria import FoodSearchCriteria
+from openapi_client.models.food_search_criteria import FoodSearchCriteria  # noqa: E501
 
 class TestFoodSearchCriteria(unittest.TestCase):
     """FoodSearchCriteria unit test stubs"""
@@ -33,7 +33,7 @@ class TestFoodSearchCriteria(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `FoodSearchCriteria`
         """
-        model = FoodSearchCriteria()
+        model = FoodSearchCriteria()  # noqa: E501
         if include_optional:
             return FoodSearchCriteria(
                 query = 'Cheddar cheese',

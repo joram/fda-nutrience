@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.sr_legacy_food_item import SRLegacyFoodItem
+from openapi_client.models.sr_legacy_food_item import SRLegacyFoodItem  # noqa: E501
 
 class TestSRLegacyFoodItem(unittest.TestCase):
     """SRLegacyFoodItem unit test stubs"""
@@ -33,7 +33,7 @@ class TestSRLegacyFoodItem(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `SRLegacyFoodItem`
         """
-        model = SRLegacyFoodItem()
+        model = SRLegacyFoodItem()  # noqa: E501
         if include_optional:
             return SRLegacyFoodItem(
                 fdc_id = 170379,

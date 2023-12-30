@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.nutrient import Nutrient
+from openapi_client.models.nutrient import Nutrient  # noqa: E501
 
 class TestNutrient(unittest.TestCase):
     """Nutrient unit test stubs"""
@@ -33,7 +33,7 @@ class TestNutrient(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `Nutrient`
         """
-        model = Nutrient()
+        model = Nutrient()  # noqa: E501
         if include_optional:
             return Nutrient(
                 id = 1005,

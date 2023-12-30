@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.abridged_food_nutrient import AbridgedFoodNutrient
+from openapi_client.models.abridged_food_nutrient import AbridgedFoodNutrient  # noqa: E501
 
 class TestAbridgedFoodNutrient(unittest.TestCase):
     """AbridgedFoodNutrient unit test stubs"""
@@ -33,7 +33,7 @@ class TestAbridgedFoodNutrient(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `AbridgedFoodNutrient`
         """
-        model = AbridgedFoodNutrient()
+        model = AbridgedFoodNutrient()  # noqa: E501
         if include_optional:
             return AbridgedFoodNutrient(
                 number = 303,

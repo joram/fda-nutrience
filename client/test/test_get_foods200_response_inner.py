@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.get_foods200_response_inner import GetFoods200ResponseInner
+from openapi_client.models.get_foods200_response_inner import GetFoods200ResponseInner  # noqa: E501
 
 class TestGetFoods200ResponseInner(unittest.TestCase):
     """GetFoods200ResponseInner unit test stubs"""
@@ -33,7 +33,7 @@ class TestGetFoods200ResponseInner(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `GetFoods200ResponseInner`
         """
-        model = GetFoods200ResponseInner()
+        model = GetFoods200ResponseInner()  # noqa: E501
         if include_optional:
             return GetFoods200ResponseInner(
                 data_type = 'SR Legacy',

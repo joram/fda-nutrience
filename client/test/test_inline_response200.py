@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.inline_response200 import InlineResponse200
+from openapi_client.models.inline_response200 import InlineResponse200  # noqa: E501
 
 class TestInlineResponse200(unittest.TestCase):
     """InlineResponse200 unit test stubs"""
@@ -33,7 +33,7 @@ class TestInlineResponse200(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `InlineResponse200`
         """
-        model = InlineResponse200()
+        model = InlineResponse200()  # noqa: E501
         if include_optional:
             return InlineResponse200(
                 data_type = 'SR Legacy',

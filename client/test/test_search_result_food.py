@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.search_result_food import SearchResultFood
+from openapi_client.models.search_result_food import SearchResultFood  # noqa: E501
 
 class TestSearchResultFood(unittest.TestCase):
     """SearchResultFood unit test stubs"""
@@ -33,7 +33,7 @@ class TestSearchResultFood(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `SearchResultFood`
         """
-        model = SearchResultFood()
+        model = SearchResultFood()  # noqa: E501
         if include_optional:
             return SearchResultFood(
                 fdc_id = 45001529,

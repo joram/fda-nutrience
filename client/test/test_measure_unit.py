@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.measure_unit import MeasureUnit
+from openapi_client.models.measure_unit import MeasureUnit  # noqa: E501
 
 class TestMeasureUnit(unittest.TestCase):
     """MeasureUnit unit test stubs"""
@@ -33,7 +33,7 @@ class TestMeasureUnit(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `MeasureUnit`
         """
-        model = MeasureUnit()
+        model = MeasureUnit()  # noqa: E501
         if include_optional:
             return MeasureUnit(
                 id = 999,

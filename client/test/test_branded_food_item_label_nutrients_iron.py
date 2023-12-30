@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.branded_food_item_label_nutrients_iron import BrandedFoodItemLabelNutrientsIron
+from openapi_client.models.branded_food_item_label_nutrients_iron import BrandedFoodItemLabelNutrientsIron  # noqa: E501
 
 class TestBrandedFoodItemLabelNutrientsIron(unittest.TestCase):
     """BrandedFoodItemLabelNutrientsIron unit test stubs"""
@@ -33,7 +33,7 @@ class TestBrandedFoodItemLabelNutrientsIron(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `BrandedFoodItemLabelNutrientsIron`
         """
-        model = BrandedFoodItemLabelNutrientsIron()
+        model = BrandedFoodItemLabelNutrientsIron()  # noqa: E501
         if include_optional:
             return BrandedFoodItemLabelNutrientsIron(
                 value = 0.7196

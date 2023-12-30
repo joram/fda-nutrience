@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.food_portion import FoodPortion
+from openapi_client.models.food_portion import FoodPortion  # noqa: E501
 
 class TestFoodPortion(unittest.TestCase):
     """FoodPortion unit test stubs"""
@@ -33,7 +33,7 @@ class TestFoodPortion(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `FoodPortion`
         """
-        model = FoodPortion()
+        model = FoodPortion()  # noqa: E501
         if include_optional:
             return FoodPortion(
                 id = 135806,

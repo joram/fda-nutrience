@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.wweia_food_category import WweiaFoodCategory
+from openapi_client.models.wweia_food_category import WweiaFoodCategory  # noqa: E501
 
 class TestWweiaFoodCategory(unittest.TestCase):
     """WweiaFoodCategory unit test stubs"""
@@ -33,7 +33,7 @@ class TestWweiaFoodCategory(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `WweiaFoodCategory`
         """
-        model = WweiaFoodCategory()
+        model = WweiaFoodCategory()  # noqa: E501
         if include_optional:
             return WweiaFoodCategory(
                 wweia_food_category_code = 3002,

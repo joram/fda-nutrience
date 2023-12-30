@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.food_update_log import FoodUpdateLog
+from openapi_client.models.food_update_log import FoodUpdateLog  # noqa: E501
 
 class TestFoodUpdateLog(unittest.TestCase):
     """FoodUpdateLog unit test stubs"""
@@ -33,7 +33,7 @@ class TestFoodUpdateLog(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `FoodUpdateLog`
         """
-        model = FoodUpdateLog()
+        model = FoodUpdateLog()  # noqa: E501
         if include_optional:
             return FoodUpdateLog(
                 fdc_id = 534358,

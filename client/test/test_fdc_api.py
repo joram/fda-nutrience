@@ -14,14 +14,14 @@
 
 import unittest
 
-from openapi_client.api.fdc_api import FDCApi
+from openapi_client.api.fdc_api import FDCApi  # noqa: E501
 
 
 class TestFDCApi(unittest.TestCase):
     """FDCApi unit test stubs"""
 
     def setUp(self) -> None:
-        self.api = FDCApi()
+        self.api = FDCApi()  # noqa: E501
 
     def tearDown(self) -> None:
         pass
@@ -29,63 +29,63 @@ class TestFDCApi(unittest.TestCase):
     def test_get_food(self) -> None:
         """Test case for get_food
 
-        Fetches details for one food item by FDC ID
+        Fetches details for one food item by FDC ID  # noqa: E501
         """
         pass
 
     def test_get_foods(self) -> None:
         """Test case for get_foods
 
-        Fetches details for multiple food items using input FDC IDs
+        Fetches details for multiple food items using input FDC IDs  # noqa: E501
         """
         pass
 
     def test_get_foods_list(self) -> None:
         """Test case for get_foods_list
 
-        Returns a paged list of foods, in the 'abridged' format
+        Returns a paged list of foods, in the 'abridged' format  # noqa: E501
         """
         pass
 
     def test_get_foods_search(self) -> None:
         """Test case for get_foods_search
 
-        Returns a list of foods that matched search (query) keywords
+        Returns a list of foods that matched search (query) keywords  # noqa: E501
         """
         pass
 
     def test_get_json_spec(self) -> None:
         """Test case for get_json_spec
 
-        Returns this documentation in JSON format
+        Returns this documentation in JSON format  # noqa: E501
         """
         pass
 
     def test_get_yaml_spec(self) -> None:
         """Test case for get_yaml_spec
 
-        Returns this documentation in JSON format
+        Returns this documentation in JSON format  # noqa: E501
         """
         pass
 
     def test_post_foods(self) -> None:
         """Test case for post_foods
 
-        Fetches details for multiple food items using input FDC IDs
+        Fetches details for multiple food items using input FDC IDs  # noqa: E501
         """
         pass
 
     def test_post_foods_list(self) -> None:
         """Test case for post_foods_list
 
-        Returns a paged list of foods, in the 'abridged' format
+        Returns a paged list of foods, in the 'abridged' format  # noqa: E501
         """
         pass
 
     def test_post_foods_search(self) -> None:
         """Test case for post_foods_search
 
-        Returns a list of foods that matched search (query) keywords
+        Returns a list of foods that matched search (query) keywords  # noqa: E501
         """
         pass
 

@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.abridged_food_item import AbridgedFoodItem
+from openapi_client.models.abridged_food_item import AbridgedFoodItem  # noqa: E501
 
 class TestAbridgedFoodItem(unittest.TestCase):
     """AbridgedFoodItem unit test stubs"""
@@ -33,7 +33,7 @@ class TestAbridgedFoodItem(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `AbridgedFoodItem`
         """
-        model = AbridgedFoodItem()
+        model = AbridgedFoodItem()  # noqa: E501
         if include_optional:
             return AbridgedFoodItem(
                 data_type = 'Branded',

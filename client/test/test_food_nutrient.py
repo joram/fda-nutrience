@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.food_nutrient import FoodNutrient
+from openapi_client.models.food_nutrient import FoodNutrient  # noqa: E501
 
 class TestFoodNutrient(unittest.TestCase):
     """FoodNutrient unit test stubs"""
@@ -33,7 +33,7 @@ class TestFoodNutrient(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `FoodNutrient`
         """
-        model = FoodNutrient()
+        model = FoodNutrient()  # noqa: E501
         if include_optional:
             return FoodNutrient(
                 id = 167514,

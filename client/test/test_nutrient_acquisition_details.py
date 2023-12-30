@@ -15,7 +15,7 @@
 import unittest
 import datetime
 
-from openapi_client.models.nutrient_acquisition_details import NutrientAcquisitionDetails
+from openapi_client.models.nutrient_acquisition_details import NutrientAcquisitionDetails  # noqa: E501
 
 class TestNutrientAcquisitionDetails(unittest.TestCase):
     """NutrientAcquisitionDetails unit test stubs"""
@@ -33,7 +33,7 @@ class TestNutrientAcquisitionDetails(unittest.TestCase):
             optional params are included """
         # uncomment below to create an instance of `NutrientAcquisitionDetails`
         """
-        model = NutrientAcquisitionDetails()
+        model = NutrientAcquisitionDetails()  # noqa: E501
         if include_optional:
             return NutrientAcquisitionDetails(
                 sample_unit_id = 321632,
